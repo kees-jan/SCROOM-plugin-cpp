@@ -10,7 +10,7 @@
 
 class SurfaceWrapper : public virtual Scroom::Utils::Base {
 public:
-  typedef boost::shared_ptr<SurfaceWrapper> Ptr;
+  typedef std::shared_ptr<SurfaceWrapper> Ptr;
 
   /** The cairo surface wrapped by this class */
   cairo_surface_t *surface;

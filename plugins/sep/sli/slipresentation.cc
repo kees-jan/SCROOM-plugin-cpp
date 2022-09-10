@@ -12,20 +12,16 @@
 #include <scroom/cairo-helpers.hh>
 #include <scroom/unused.hh>
 
-SliPresentationInterface::WeakPtr SliPresentation::weakPtrToThis;
-
 SliPresentation::SliPresentation(ScroomInterface::Ptr scroomInterface_)
     : scroomInterface(scroomInterface_) {}
 
 SliPresentation::Ptr
 SliPresentation::create(ScroomInterface::Ptr scroomInterface_) {
   SliPresentation::Ptr result = Ptr(new SliPresentation(scroomInterface_));
-  weakPtrToThis = result;
 
   // Can't do this in the constructor as it requires an existing shared pointer
   result->triggerRedrawFunc =
-      boost::bind(&SliPresentation::triggerRedraw,
-                  result->shared_from_this<SliPresentation>());
+      boost::bind(&SliPresentation::triggerRedraw, result);
   result->source = SliSource::create(result->triggerRedrawFunc);
 
   return result;
@@ -246,7 +242,8 @@ void SliPresentation::viewAdded(ViewInterface::WeakPtr vi) {
 
   // We want to have only one control panel in total
   if (views.empty()) {
-    controlPanel = SliControlPanel::create(vi, weakPtrToThis);
+    controlPanel =
+        SliControlPanel::create(vi, shared_from_this<SliPresentation>());
     controlPanel->disableInteractions();
 
     // Provide the source with the means to enable and disable the widgets in
@@ -276,7 +273,9 @@ void SliPresentation::viewRemoved(ViewInterface::WeakPtr vi) {
   }
 }
 
-std::set<ViewInterface::WeakPtr> SliPresentation::getViews() { return views; }
+Scroom::Utils::WeakKeySet<ViewInterface::WeakPtr> SliPresentation::getViews() {
+  return views;
+}
 
 // ////////////////////////////////////////////////////////////////////////
 // // PipetteViewInterface

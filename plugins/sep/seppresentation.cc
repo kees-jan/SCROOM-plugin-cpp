@@ -146,7 +146,9 @@ void SepPresentation::viewRemoved(ViewInterface::WeakPtr interface) {
   tbi->close(interface);
 }
 
-std::set<ViewInterface::WeakPtr> SepPresentation::getViews() { return views; }
+Scroom::Utils::WeakKeySet<ViewInterface::WeakPtr> SepPresentation::getViews() {
+  return views;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // PipetteViewInterface

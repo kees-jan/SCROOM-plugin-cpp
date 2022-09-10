@@ -6,8 +6,8 @@
 
 class SliPresentationInterface {
 public:
-  typedef boost::shared_ptr<SliPresentationInterface> Ptr;
-  typedef boost::weak_ptr<SliPresentationInterface> WeakPtr;
+  typedef std::shared_ptr<SliPresentationInterface> Ptr;
+  typedef std::weak_ptr<SliPresentationInterface> WeakPtr;
 
   virtual ~SliPresentationInterface() {}
 

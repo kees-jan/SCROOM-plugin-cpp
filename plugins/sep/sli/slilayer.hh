@@ -7,7 +7,7 @@
 
 class SliLayer : public virtual Scroom::Utils::Base {
 public:
-  typedef boost::shared_ptr<SliLayer> Ptr;
+  typedef std::shared_ptr<SliLayer> Ptr;
 
   /** Height of the layer (in pixels) */
   int height;

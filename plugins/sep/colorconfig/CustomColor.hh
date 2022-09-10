@@ -12,7 +12,7 @@
 
 class CustomColor {
 public:
-  using Ptr = boost::shared_ptr<CustomColor>;
+  using Ptr = std::shared_ptr<CustomColor>;
 
   std::string name;
   std::vector<std::string> aliases;

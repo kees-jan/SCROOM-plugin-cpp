@@ -8,7 +8,7 @@ class Sep : public PluginInformationInterface,
             public OpenInterface,
             virtual public Scroom::Utils::Base {
 public:
-  typedef boost::shared_ptr<Sep> Ptr;
+  typedef std::shared_ptr<Sep> Ptr;
 
 private:
   Sep();

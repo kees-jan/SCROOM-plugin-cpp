@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="CidrRootsConfiguration">
+    <excludeRoots>
+      <file path="$PROJECT_DIR$/../scroom/cmake-build-debug-clang-10" />
+      <file path="$PROJECT_DIR$/../scroom/cmake-build-debug-gcc-10" />
+      <file path="$PROJECT_DIR$/../scroom/cmake-build-relwithdebinfo-clang-10" />
+      <file path="$PROJECT_DIR$/../scroom/cmake-build-relwithdebinfo-gcc-10" />
+      <file path="$PROJECT_DIR$/../scroom/doc/_build" />
+      <file path="$PROJECT_DIR$/../scroom/doc/_static/doxygen" />
+    </excludeRoots>
+  </component>
 </project>

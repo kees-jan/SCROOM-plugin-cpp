@@ -25,7 +25,7 @@ struct SepFile {
  */
 class SepSource : public SourcePresentation {
 public:
-  typedef boost::shared_ptr<SepSource> Ptr;
+  typedef std::shared_ptr<SepSource> Ptr;
 
 public: // For testing
   /** Data structure to represent the opened SEP file in memory. */

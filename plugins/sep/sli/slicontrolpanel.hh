@@ -12,7 +12,7 @@ enum widget { TREEVIEW = 0, SLIDER_LOW, SLIDER_HIGH };
 
 class SliControlPanel : public boost::enable_shared_from_this<SliControlPanel> {
 public:
-  typedef boost::shared_ptr<SliControlPanel> Ptr;
+  typedef std::shared_ptr<SliControlPanel> Ptr;
 
 private:
   /** The number of layers that the SliPresentation consists of*/

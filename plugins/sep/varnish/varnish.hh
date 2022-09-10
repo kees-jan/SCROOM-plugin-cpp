@@ -5,7 +5,7 @@
 
 class Varnish {
 public:
-  typedef boost::shared_ptr<Varnish> Ptr;
+  typedef std::shared_ptr<Varnish> Ptr;
 
   /** Callback to trigger a redraw of the presentation */
   boost::function<void()> triggerRedraw;

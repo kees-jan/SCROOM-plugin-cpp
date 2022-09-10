@@ -8,11 +8,6 @@
 #include <scroom/bitmap-helpers.hh>
 #include <utility>
 
-boost::shared_ptr<unsigned char> shared_malloc(size_t size) {
-  return boost::shared_ptr<unsigned char>(
-      static_cast<unsigned char *>(malloc(size)), free);
-}
-
 PipetteLayerOperations::PipetteColor
 PipetteCommonOperationsCustomColor::sumPixelValues(
     Scroom::Utils::Rectangle<int> area, const ConstTile::Ptr &tile) {
@@ -72,7 +67,8 @@ Scroom::Utils::Stuff OperationsCustomColors::cache(const ConstTile::Ptr &tile) {
   // Allocate the space for the cache - stride is the height of one row
   const int stride =
       cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, tile->width);
-  boost::shared_ptr<uint8_t> data = shared_malloc(stride * tile->height);
+  std::shared_ptr<uint8_t> data =
+      Scroom::Utils::shared_malloc(stride * tile->height);
 
   // Row is a pointer to a row of pixels (destination)
   auto *row = reinterpret_cast<uint32_t *>(data.get());

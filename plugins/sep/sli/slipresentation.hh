@@ -18,8 +18,8 @@ class SliPresentation : public PresentationBase,
                         public SliPresentationInterface,
                         public PipetteViewInterface {
 public:
-  typedef boost::shared_ptr<SliPresentation> Ptr;
-  typedef boost::weak_ptr<SliPresentation> WeakPtr;
+  typedef std::shared_ptr<SliPresentation> Ptr;
+  typedef std::weak_ptr<SliPresentation> WeakPtr;
 
   /** Contains information on the aspect ratio and is used to scale the
    * presentation accordingly */
@@ -30,7 +30,7 @@ public: // For testing
   std::map<std::string, std::string> properties;
 
   /** The views associated with this presentation */
-  std::set<ViewInterface::WeakPtr> views;
+  Scroom::Utils::WeakKeySet<ViewInterface::WeakPtr> views;
 
   /** Reference to the ScroomInterface, needed for showing presentation */
   ScroomInterface::Ptr scroomInterface;
@@ -44,9 +44,6 @@ public: // For testing
   /** Callback to the own triggerRedraw function. Is passed to other classes to
    * allow them to redraw. */
   boost::function<void()> triggerRedrawFunc;
-
-  /** Weak pointer to this. Needed for passing a reference to SliControlPanel */
-  static SliPresentationInterface::WeakPtr weakPtrToThis;
 
   /** The number of pixels per ResolutionUnit in the ImageWidth direction */
   float Xresolution = -1;
@@ -125,7 +122,7 @@ public:
 
   void viewAdded(ViewInterface::WeakPtr vi) override;
   void viewRemoved(ViewInterface::WeakPtr vi) override;
-  std::set<ViewInterface::WeakPtr> getViews() override;
+  Scroom::Utils::WeakKeySet<ViewInterface::WeakPtr> getViews() override;
 
   ////////////////////////////////////////////////////////////////////////
   // PipetteViewInterface

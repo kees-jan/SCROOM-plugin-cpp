@@ -10,8 +10,8 @@
 
 class SliSource : public virtual Scroom::Utils::Base {
 public:
-  typedef boost::shared_ptr<SliSource> Ptr;
-  typedef boost::weak_ptr<SliSource> WeakPtr;
+  typedef std::shared_ptr<SliSource> Ptr;
+  typedef std::weak_ptr<SliSource> WeakPtr;
 
   /** The SliLayers that are part of the presentation */
   std::vector<SliLayer::Ptr> layers;

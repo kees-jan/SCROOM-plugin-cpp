@@ -59,7 +59,7 @@ void ColorConfig::addNonExistentDefaultColors() {
   // If no cyan configuration exists, add the default configuration
   if (!getColorByNameOrAlias("c")) {
     CustomColor::Ptr newColour =
-        boost::make_shared<CustomColor>("C", 1, 0, 0, 0);
+        std::make_shared<CustomColor>("C", 1, 0, 0, 0);
 
     colors.push_back(newColour);
   }
@@ -67,7 +67,7 @@ void ColorConfig::addNonExistentDefaultColors() {
   // If no magenta configuration exists, add the default configuration
   if (!getColorByNameOrAlias("m")) {
     CustomColor::Ptr newColour =
-        boost::make_shared<CustomColor>("M", 0, 1, 0, 0);
+        std::make_shared<CustomColor>("M", 0, 1, 0, 0);
 
     colors.push_back(newColour);
   }
@@ -75,7 +75,7 @@ void ColorConfig::addNonExistentDefaultColors() {
   // If no yellow configuration exists, add the default configuration
   if (!getColorByNameOrAlias("y")) {
     CustomColor::Ptr newColour =
-        boost::make_shared<CustomColor>("Y", 0, 0, 1, 0);
+        std::make_shared<CustomColor>("Y", 0, 0, 1, 0);
 
     colors.push_back(newColour);
   }
@@ -83,7 +83,7 @@ void ColorConfig::addNonExistentDefaultColors() {
   // If no key configuration exists, add the default configuration
   if (!getColorByNameOrAlias("k")) {
     CustomColor::Ptr newColour =
-        boost::make_shared<CustomColor>("K", 0, 0, 0, 1);
+        std::make_shared<CustomColor>("K", 0, 0, 0, 1);
 
     colors.push_back(newColour);
   }
@@ -134,7 +134,7 @@ void ColorConfig::parseColor(
   auto y = v.second.get<float>("yMultiplier");
   auto k = v.second.get<float>("kMultiplier");
   CustomColor::Ptr newColour =
-      boost::make_shared<CustomColor>(name, c, m, y, k);
+      std::make_shared<CustomColor>(name, c, m, y, k);
 
   // Initialise aliases vector
   std::vector<std::string> validAliases = {};

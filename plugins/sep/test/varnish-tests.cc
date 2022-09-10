@@ -45,7 +45,7 @@ public:
   void setStatusMessage(const std::string &) {
     require(Scroom::GtkHelpers::on_ui_thread());
   };
-  boost::shared_ptr<PresentationInterface> getCurrentPresentation() {
+  std::shared_ptr<PresentationInterface> getCurrentPresentation() {
     return nullptr;
   };
   void addToolButton(GtkToggleButton *, ToolStateListener::Ptr) {

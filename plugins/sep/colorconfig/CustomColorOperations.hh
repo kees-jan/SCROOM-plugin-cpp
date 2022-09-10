@@ -17,7 +17,7 @@ protected:
   std::vector<CustomColor::Ptr> colors;
 
 public:
-  using Ptr = boost::shared_ptr<PipetteCommonOperationsCustomColor>;
+  using Ptr = std::shared_ptr<PipetteCommonOperationsCustomColor>;
 
 public:
   PipetteCommonOperationsCustomColor(int bps_, int spp_) : bps(bps_) {

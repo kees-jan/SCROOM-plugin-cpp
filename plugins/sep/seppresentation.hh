@@ -17,7 +17,7 @@ class SepPresentation : public PresentationBase,
                         public PipetteViewInterface {
 
 public:
-  typedef boost::shared_ptr<SepPresentation> Ptr;
+  typedef std::shared_ptr<SepPresentation> Ptr;
 
 public: // For testing
   SepSource::Ptr sep_source;
@@ -29,7 +29,7 @@ public: // For testing
   size_t height;
   TransformationData::Ptr transform;
 
-  std::set<ViewInterface::WeakPtr> views;
+  Scroom::Utils::WeakKeySet<ViewInterface::WeakPtr> views;
 
   std::map<std::string, std::string> properties;
 
@@ -82,7 +82,7 @@ public:
 
   void viewAdded(ViewInterface::WeakPtr interface) override;
   void viewRemoved(ViewInterface::WeakPtr interface) override;
-  std::set<ViewInterface::WeakPtr> getViews() override;
+  Scroom::Utils::WeakKeySet<ViewInterface::WeakPtr> getViews() override;
 
   ////////////////////////////////////////////////////////////////////////
   // PipetteViewInterface
