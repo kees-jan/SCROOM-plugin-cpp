@@ -10,7 +10,6 @@
 #include <regex>
 
 #include <scroom/cairo-helpers.hh>
-#include <scroom/unused.hh>
 
 SliPresentation::SliPresentation(ScroomInterface::Ptr scroomInterface_)
     : scroomInterface(scroomInterface_) {}
@@ -176,7 +175,6 @@ Scroom::Utils::Rectangle<double> SliPresentation::getRect() {
 void SliPresentation::redraw(ViewInterface::Ptr const &vi, cairo_t *cr,
                              Scroom::Utils::Rectangle<double> presentationArea,
                              int zoom) {
-  UNUSED(vi);
   Scroom::Utils::Rectangle<double> actualPresentationArea = getRect();
   double pixelSize = pixelSizeFromZoom(zoom);
 

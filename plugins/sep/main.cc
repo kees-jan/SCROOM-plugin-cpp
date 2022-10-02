@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include <scroom/scroomplugin.hh>
-#include <scroom/unused.hh>
 
 #include "sep.hh"
 

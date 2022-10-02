@@ -22,8 +22,7 @@ jobs:
 
       - name: Run clang-format
         run: |
-          find . \( -name scroom \) -type d -prune \
-            -o  \( -name \*.cc -o -name \*.hh \) -exec clang-format -i \{\} \+
+          build_scripts/clang-format
 
       - name: Report results
         run: |
@@ -44,8 +43,7 @@ jobs:
       - name: Run cmake-format
         run: |
           source ~/.profile
-          find . \( -name cmake-modules -o -name .git -o -name cmake-build-\* -o -name scroom \) -type d -prune \
-            -o \( -name CMakeLists.txt  -o -name \*.cmake \) -exec cmake-format -i \{\} \+
+          build_scripts/cmake-format
 
       - name: Report results
         run: |

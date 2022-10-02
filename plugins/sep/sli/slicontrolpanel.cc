@@ -1,6 +1,5 @@
 #include <boost/dynamic_bitset.hpp>
 #include <gdk/gdkkeysyms.h>
-#include <scroom/unused.hh>
 
 #include "slicontrolpanel.hh"
 #include "slilayer.hh"
@@ -8,19 +7,15 @@
 using Scroom::GtkHelpers::sync_on_ui_thread;
 
 /* Ignore scroll events on both sliders */
-gboolean scroll_event(GtkWidget *widget, GdkEvent *event, gpointer user_data) {
-  UNUSED(widget);
-  UNUSED(event);
-  UNUSED(user_data);
+gboolean scroll_event(GtkWidget * /*widget*/, GdkEvent * /*event*/,
+                      gpointer /*user_data*/) {
   return TRUE;
 }
 
 /* Remove focus from the widget when the ESC key is pressed */
 gboolean escape_key_pressed(GtkWidget *widget, GdkEventKey *event,
-                            gpointer user_data) {
+                            gpointer /*user_data*/) {
   require(Scroom::GtkHelpers::on_ui_thread());
-
-  UNUSED(user_data);
 
   if (event->keyval == GDK_KEY_Escape) {
     gtk_widget_set_sensitive(widget, FALSE);
@@ -106,11 +101,9 @@ void update_tree_model(GtkTreeView *treeview, int min, int max, int low,
 }
 
 /* Takes care of all focus-out, button-press, and key-release events */
-gboolean slider_event_handler(GtkWidget *widget, GdkEvent *event,
+gboolean slider_event_handler(GtkWidget *widget, GdkEvent * /*event*/,
                               SliControlPanel *cPanel) {
   require(Scroom::GtkHelpers::on_ui_thread());
-
-  UNUSED(event);
 
   if (widget == cPanel->widgets[SLIDER_LOW]) {
     GtkAdjustment *adj_other = gtk_range_get_adjustment(
@@ -155,12 +148,9 @@ gboolean slider_event_handler(GtkWidget *widget, GdkEvent *event,
 }
 
 /* Makes sure a slider can't go above or below the other slider's value */
-gboolean change_value(GtkRange *range, GtkScrollType scroll, gdouble this_value,
-                      SliControlPanel *cPanel) {
+gboolean change_value(GtkRange *range, GtkScrollType /*scroll*/,
+                      gdouble this_value, SliControlPanel *cPanel) {
   require(Scroom::GtkHelpers::on_ui_thread());
-
-  UNUSED(range);
-  UNUSED(scroll);
 
   if (range == reinterpret_cast<GtkRange *>(cPanel->widgets[SLIDER_LOW])) {
     gdouble other_value = gtk_range_get_value(
@@ -179,11 +169,10 @@ gboolean change_value(GtkRange *range, GtkScrollType scroll, gdouble this_value,
 }
 
 /* Updates the Tree Model and triggers a redraw when a checkmark is toggled */
-void on_toggle(GtkCellRendererToggle *renderer, gchar *path,
+void on_toggle(GtkCellRendererToggle * /*renderer*/, gchar *path,
                SliControlPanel *cPanel) {
   require(Scroom::GtkHelpers::on_ui_thread());
 
-  UNUSED(renderer);
   GtkTreeModel *model;
   GtkTreeIter iter;
   gboolean state;

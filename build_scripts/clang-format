@@ -1,0 +1,4 @@
+#!/bin/bash -eux
+
+find . \( -name scroom \) -type d -prune \
+  -o  \( -name \*.cc -o -name \*.hh \) -print0 | parallel -0 clang-format -i \{\}
