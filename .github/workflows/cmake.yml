@@ -16,67 +16,71 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, ubuntu-22.04 ]
+        os: [ ubuntu-24.04, ubuntu-22.04 ]
         type: [ RelWithDebInfo, Debug ]
       fail-fast: false
     env:
       BUILD_TYPE: ${{ matrix.type }}
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
+
+      - name: ccache cache files
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}-ccache-${{ github.run_id }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ env.BUILD_TYPE }}-ccache-
 
       - name: Update Ubuntu package repos
         run: sudo apt-get update
 
       - name: Install Ubuntu Dependencies
         run: >
-          sudo apt-get install
+          sudo apt-get  -yq --no-install-suggests --no-install-recommends install 
           build-essential
-          git 
           ccache 
-          python3-pip 
-          libboost-test-dev 
+          doxygen 
+          git 
+          google-mock 
+          graphviz 
           libboost-dev 
           libboost-filesystem-dev 
           libboost-program-options-dev 
           libboost-system-dev 
+          libboost-test-dev 
           libboost-thread-dev 
-          libgtest-dev 
-          google-mock 
+          libc6-dev
           libcairo2-dev 
           libglib2.0-dev 
+          libgtest-dev 
           libgtk-3-dev 
           libtiff5-dev 
+          ninja-build
           pkg-config 
-          doxygen 
-          graphviz 
-          libc6-dev
+          python3-pip 
 
       - name: Configure CMake
-        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
+        run: cmake -G Ninja -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
       - name: Build
         # Build your program with the given configuration
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-      - name: Load enviroment
-        run: source ${{github.workspace}}/build/ENVIRONMENT
-
       - name: Test
         working-directory: ${{github.workspace}}/build
         # Execute tests defined by the CMake configuration.
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-        run: xvfb-run ctest -C ${{env.BUILD_TYPE}}
+        run: xvfb-run ctest -C ${{env.BUILD_TYPE}} -j2 --output-on-failure
 
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
@@ -108,10 +112,12 @@ jobs:
           build_scripts\github\mingwdo
           build_scripts/github/build-cmake-mingw
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
+          name: Sources
           path: ScroomCPPPlugins-*Source.tar.gz
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
+          name: Windows-portable-executable
           path: scroom-win-*.zip
