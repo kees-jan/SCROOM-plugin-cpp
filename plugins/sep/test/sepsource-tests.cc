@@ -1,111 +1,107 @@
-#include <boost/dll.hpp>
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
+#include <boost/algorithm/string.hpp>
 
 #include "../sepsource.hh"
 #include "../sli/slilayer.hh"
 #include "testglobals.hh"
-#include <boost/algorithm/string.hpp>
 
-/** Test cases for sepsource.hh */
-
-BOOST_AUTO_TEST_SUITE(SepSource_Tests)
-
-BOOST_AUTO_TEST_CASE(sepsource_create) {
+TEST(SepSource_Tests, sepsource_create) { // NOLINT
   auto source = SepSource::create();
-  BOOST_CHECK(source != nullptr);
+  EXPECT_NE(source, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_parent_dir) {
+TEST(SepSource_Tests, sepsource_parent_dir) { // NOLINT
   auto abctest = SepSource::findParentDir("abc/test/removed");
-  BOOST_CHECK(abctest == "abc/test");
+  EXPECT_EQ(abctest, "abc/test");
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_parse_sep) {
+TEST(SepSource_Tests, sepsource_parse_sep) { // NOLINT
   SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
-  BOOST_CHECK(file.files.size() == 4);
+  EXPECT_EQ(file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(file.files[boost::algorithm::to_upper_copy(colour)] ==
-                TestFiles::getPathToFile(colour + ".tif"));
+    EXPECT_EQ(file.files[boost::algorithm::to_upper_copy(colour)],
+              TestFiles::getPathToFile(colour + ".tif"));
   }
 
-  BOOST_CHECK(file.width == 600);
-  BOOST_CHECK(file.height == 400);
+  EXPECT_EQ(file.width, 600);
+  EXPECT_EQ(file.height, 400);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_parse_sep_extra_lines) {
+TEST(SepSource_Tests, sepsource_parse_sep_extra_lines) { // NOLINT
   SepFile file =
       SepSource::parseSep(TestFiles::getPathToFile("sep_extra_lines.sep"));
-  BOOST_CHECK(file.files.size() == 4);
+  EXPECT_EQ(file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(file.files[boost::algorithm::to_upper_copy(colour)] ==
-                TestFiles::getPathToFile(colour + ".tif"));
+    EXPECT_EQ(file.files[boost::algorithm::to_upper_copy(colour)],
+              TestFiles::getPathToFile(colour + ".tif"));
   }
 
-  BOOST_CHECK(file.width == 600);
-  BOOST_CHECK(file.height == 400);
+  EXPECT_EQ(file.width, 600);
+  EXPECT_EQ(file.height, 400);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_parse_sep_empty_line) {
+TEST(SepSource_Tests, sepsource_parse_sep_empty_line) { // NOLINT
   SepFile file =
       SepSource::parseSep(TestFiles::getPathToFile("sep_empty_line_2.sep"));
-  BOOST_CHECK(file.files.size() == 4);
+  EXPECT_EQ(file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(file.files[boost::algorithm::to_upper_copy(colour)] ==
-                TestFiles::getPathToFile(colour + ".tif"));
+    EXPECT_EQ(file.files[boost::algorithm::to_upper_copy(colour)],
+              TestFiles::getPathToFile(colour + ".tif"));
   }
 
-  BOOST_CHECK(file.width == 600);
-  BOOST_CHECK(file.height == 400);
+  EXPECT_EQ(file.width, 600);
+  EXPECT_EQ(file.height, 400);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_parse_sep_missing_channel) {
+TEST(SepSource_Tests, sepsource_parse_sep_missing_channel) { // NOLINT
   // Y channel is not defined in this file
   SepFile file =
       SepSource::parseSep(TestFiles::getPathToFile("sep_missing_channel.sep"));
-  BOOST_CHECK(file.files.size() == 3);
+  EXPECT_EQ(file.files.size(), 3u);
 
   for (const std::string colour : {"C", "M", "K"}) {
-    BOOST_CHECK(file.files[boost::algorithm::to_upper_copy(colour)] ==
-                TestFiles::getPathToFile(colour + ".tif"));
+    EXPECT_EQ(file.files[boost::algorithm::to_upper_copy(colour)],
+              TestFiles::getPathToFile(colour + ".tif"));
   }
 
-  BOOST_CHECK(file.files["Y"].empty());
-  BOOST_CHECK(file.width == 600);
-  BOOST_CHECK(file.height == 400);
+  EXPECT_TRUE(file.files["Y"].empty());
+  EXPECT_EQ(file.width, 600);
+  EXPECT_EQ(file.height, 400);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_parse_sep_missing_channel_2) {
+TEST(SepSource_Tests, sepsource_parse_sep_missing_channel_2) { // NOLINT
   // C channel is not defined in this file + empty line
   SepFile file =
       SepSource::parseSep(TestFiles::getPathToFile("sep_empty_line_3.sep"));
-  BOOST_CHECK(file.files.size() == 3);
+  EXPECT_EQ(file.files.size(), 3u);
 
   for (const std::string colour : {"M", "Y", "K"}) {
-    BOOST_CHECK(file.files[boost::algorithm::to_upper_copy(colour)] ==
-                TestFiles::getPathToFile(colour + ".tif"));
+    EXPECT_EQ(file.files[boost::algorithm::to_upper_copy(colour)],
+              TestFiles::getPathToFile(colour + ".tif"));
   }
 
-  BOOST_CHECK(file.files["C"].empty());
-  BOOST_CHECK(file.width == 600);
-  BOOST_CHECK(file.height == 400);
+  EXPECT_TRUE(file.files["C"].empty());
+  EXPECT_EQ(file.width, 600);
+  EXPECT_EQ(file.height, 400);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_get_for_none) {
+TEST(SepSource_Tests, sepsource_get_for_none) { // NOLINT
   uint16_t unit;
   float x_res, y_res;
   auto source = SepSource::create();
 
   source->getForOneChannel(nullptr, unit, x_res, y_res);
 
-  BOOST_CHECK(unit == RESUNIT_NONE);
-  BOOST_CHECK(std::abs(x_res - 1.0) < 1e-4);
-  BOOST_CHECK(std::abs(y_res - 1.0) < 1e-4);
+  EXPECT_EQ(unit, RESUNIT_NONE);
+  EXPECT_NEAR(x_res, 1.0, 1e-4);
+  EXPECT_NEAR(y_res, 1.0, 1e-4);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_get_resolution_null) {
+TEST(SepSource_Tests, sepsource_get_resolution_null) { // NOLINT
   uint16_t unit;
   float x_res, y_res;
   auto source = SepSource::create();
@@ -115,11 +111,10 @@ BOOST_AUTO_TEST_CASE(sepsource_get_resolution_null) {
   source->channel_files["Y"] = nullptr;
   source->channel_files["K"] = nullptr;
 
-  auto res = source->getResolution(unit, x_res, y_res);
-  BOOST_CHECK(res == true);
+  EXPECT_TRUE(source->getResolution(unit, x_res, y_res));
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_get_transformation) {
+TEST(SepSource_Tests, sepsource_get_transformation) { // NOLINT
   auto source = SepSource::create();
 
   source->channel_files["C"] = nullptr;
@@ -128,11 +123,11 @@ BOOST_AUTO_TEST_CASE(sepsource_get_transformation) {
   source->channel_files["K"] = nullptr;
 
   auto res = source->getTransform()->getAspectRatio();
-  BOOST_CHECK(std::abs(res.x - 1.0) < 1e4);
-  BOOST_CHECK(std::abs(res.y - 1.0) < 1e4);
+  EXPECT_NEAR(res.x, 1.0, 1e4);
+  EXPECT_NEAR(res.y, 1.0, 1e4);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_set_data) {
+TEST(SepSource_Tests, sepsource_set_data) { // NOLINT
   // Preparation
   auto source = SepSource::create();
   SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
@@ -142,19 +137,18 @@ BOOST_AUTO_TEST_CASE(sepsource_set_data) {
 
   // Check properties, not the actual value, because we don't care if
   // setData copies the passed SepFile.
-  BOOST_CHECK(source->sep_file.files.size() == 4);
+  EXPECT_EQ(source->sep_file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(
-        source->sep_file.files[boost::algorithm::to_upper_copy(colour)] ==
-        TestFiles::getPathToFile(colour + ".tif"));
+    EXPECT_EQ(source->sep_file.files[boost::algorithm::to_upper_copy(colour)],
+              TestFiles::getPathToFile(colour + ".tif"));
   }
 
-  BOOST_CHECK(source->sep_file.width == 600);
-  BOOST_CHECK(source->sep_file.height == 400);
+  EXPECT_EQ(source->sep_file.width, 600);
+  EXPECT_EQ(source->sep_file.height, 400);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_open_files) {
+TEST(SepSource_Tests, sepsource_open_files) { // NOLINT
   // Preparation
   auto source = SepSource::create();
   SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
@@ -165,16 +159,15 @@ BOOST_AUTO_TEST_CASE(sepsource_open_files) {
 
   // Check that all the CMYK files have been opened
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(
-        source->channel_files[boost::algorithm::to_upper_copy(colour)] !=
-        nullptr);
+    EXPECT_NE(source->channel_files[boost::algorithm::to_upper_copy(colour)],
+              nullptr);
   }
 
   // Check that varnish is not opened
-  BOOST_CHECK(source->varnish == nullptr);
+  EXPECT_EQ(source->varnish, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_open_files_twice) {
+TEST(SepSource_Tests, sepsource_open_files_twice) { // NOLINT
   // Preparation
   auto source = SepSource::create();
   SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
@@ -193,13 +186,12 @@ BOOST_AUTO_TEST_CASE(sepsource_open_files_twice) {
 
   // Check that all the CMYK files have not been opened again
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(
-        source->channel_files[boost::algorithm::to_upper_copy(colour)] ==
-        files[colour]);
+    EXPECT_EQ(source->channel_files[boost::algorithm::to_upper_copy(colour)],
+              files[colour]);
   }
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_open_files_extra) {
+TEST(SepSource_Tests, sepsource_open_files_extra) { // NOLINT
   // Preparation
   auto source = SepSource::create();
   SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmykv.sep"));
@@ -213,16 +205,15 @@ BOOST_AUTO_TEST_CASE(sepsource_open_files_extra) {
 
   // Check that all the CMYK files have been opened
   for (const std::string colour : {"C", "M", "Y", "K"}) {
-    BOOST_CHECK(
-        source->channel_files[boost::algorithm::to_upper_copy(colour)] !=
-        nullptr);
+    EXPECT_NE(source->channel_files[boost::algorithm::to_upper_copy(colour)],
+              nullptr);
   }
 
   // Check that varnish has also been opened
-  BOOST_CHECK(source->varnish != nullptr);
+  EXPECT_NE(source->varnish, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_check_files) {
+TEST(SepSource_Tests, sepsource_check_files) { // NOLINT
   // Preparation
   auto source = SepSource::create();
   SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmykv.sep"));
@@ -232,94 +223,60 @@ BOOST_AUTO_TEST_CASE(sepsource_check_files) {
   source->sep_file.files["W"] = TestFiles::getPathToFile("C.tif");
   source->openFiles();
 
-  // Tested call
+  // Tested call — check that it does not crash
   source->checkFiles();
-
-  // Check that it did not crash -> did not throw warnings
-  BOOST_CHECK(true);
-}
-/**
-BOOST_AUTO_TEST_CASE(sepsource_apply_white_no_effect_1) {
-  auto res = SepSource::applyWhiteInk(0, 100, 0);
-  BOOST_CHECK(res == 100);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_apply_white_no_effect_2) {
-  auto res = SepSource::applyWhiteInk(100, 50, 0);
-  BOOST_CHECK(res == 50);
-}
-
-BOOST_AUTO_TEST_CASE(sepsource_apply_white_subtract_1) {
-  auto res = SepSource::applyWhiteInk(100, 100, 1);
-  BOOST_CHECK(res == 0);
-}
-
-BOOST_AUTO_TEST_CASE(sepsource_apply_white_subtract_2) {
-  auto res = SepSource::applyWhiteInk(100, 101, 1);
-  BOOST_CHECK(res == 1);
-}
-
-BOOST_AUTO_TEST_CASE(sepsource_apply_white_multiply_1) {
-  auto res = SepSource::applyWhiteInk(100, 100, 2);
-  BOOST_CHECK(res == 61);
-}
-
-BOOST_AUTO_TEST_CASE(sepsource_apply_white_multiply_2) {
-  auto res = SepSource::applyWhiteInk(0, 100, 2);
-  BOOST_CHECK(res == 100);
-}
-*/
-
-BOOST_AUTO_TEST_CASE(sepsource_tiff_wrapper_nullptr) {
+TEST(SepSource_Tests, sepsource_tiff_wrapper_nullptr) { // NOLINT
   auto res = SepSource::TIFFReadScanline_(nullptr, nullptr, 1);
-  BOOST_CHECK(res == -1);
+  EXPECT_EQ(res, -1);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_tiff_wrapper_2) {
+TEST(SepSource_Tests, sepsource_tiff_wrapper_2) { // NOLINT
   auto file = TIFFOpen(TestFiles::getPathToFile("M_9.tif").c_str(), "r");
   auto lines = std::vector<uint8_t>(TIFFScanlineSize(file));
   int res = SepSource::TIFFReadScanline_(file, lines.data(), 1);
-  BOOST_CHECK(res != -1);
+  EXPECT_NE(res, -1);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_fill_sli_empty) {
+TEST(SepSource_Tests, sepsource_fill_sli_empty) { // NOLINT
   SliLayer::Ptr sli = SliLayer::create("", "name", 0, 0);
   sli->height = 42;
   SepSource::Ptr sepSource = SepSource::create();
   sepSource->fillSliLayerMeta(sli);
-  BOOST_CHECK(sli->height == 42);
+  EXPECT_EQ(sli->height, 42);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_fill_sli_1) {
+TEST(SepSource_Tests, sepsource_fill_sli_1) { // NOLINT
   SliLayer::Ptr sli =
       SliLayer::create(TestFiles::getPathToFile("sep_cmyk.sep"), "name", 0, 0);
   SepSource::Ptr sepSource = SepSource::create();
   sepSource->fillSliLayerMeta(sli);
   sepSource->fillSliLayerBitmap(sli);
-  BOOST_CHECK(sli->width == 600);
-  BOOST_CHECK(sli->height == 400);
-  BOOST_CHECK(sli->spp == 4); // This file specifically has 4 channels
-  BOOST_CHECK(sli->bps == 8);
-  BOOST_CHECK(sli->bitmap != nullptr);
-  BOOST_CHECK(std::abs(sli->xAspect - 1.0) < 1e-4);
-  BOOST_CHECK(std::abs(sli->yAspect - 1.0) < 1e-4);
+  EXPECT_EQ(sli->width, 600);
+  EXPECT_EQ(sli->height, 400);
+  EXPECT_EQ(sli->spp, 4); // This file specifically has 4 channels
+  EXPECT_EQ(sli->bps, 8);
+  EXPECT_NE(sli->bitmap, nullptr);
+  EXPECT_NEAR(sli->xAspect, 1.0, 1e-4);
+  EXPECT_NEAR(sli->yAspect, 1.0, 1e-4);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_closeIfNeeded_1) {
+TEST(SepSource_Tests, sepsource_closeIfNeeded_1) { // NOLINT
   auto file = TIFFOpen(TestFiles::getPathToFile("M_9.tif").c_str(), "r");
-  BOOST_CHECK(file != nullptr);
+  EXPECT_NE(file, nullptr);
   SepSource::closeIfNeeded(file);
-  BOOST_CHECK_EQUAL(file, nullptr);
+  EXPECT_EQ(file, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_closeIfNeeded_2) {
+TEST(SepSource_Tests, sepsource_closeIfNeeded_2) { // NOLINT
   auto file = TIFFOpen(nullptr, "r");
-  BOOST_CHECK(file == nullptr);
+  EXPECT_EQ(file, nullptr);
   SepSource::closeIfNeeded(file);
-  BOOST_CHECK_EQUAL(file, nullptr);
+  EXPECT_EQ(file, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(sepsource_fill_no_tiles) {
+TEST(SepSource_Tests, sepsource_fill_no_tiles) { // NOLINT
   // Preparation
   std::vector<Tile::Ptr> tiles;
   auto source = SepSource::create();
@@ -327,11 +284,6 @@ BOOST_AUTO_TEST_CASE(sepsource_fill_no_tiles) {
   source->setData(file);
   source->openFiles();
 
-  // Tested call
+  // Tested call — check that fillTiles does not crash
   source->fillTiles(0, 0, 4096, 0, tiles);
-
-  // Checks that fillTiles did not crash
-  BOOST_CHECK(true);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -1,6 +1,4 @@
-#include <boost/dll.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include "../varnish/varnish.hh"
 #include "testglobals.hh"
@@ -53,35 +51,31 @@ public:
   };
 };
 
-void dummyFunction() {}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Tests for varnish loading
 
-BOOST_AUTO_TEST_SUITE(varnish_tests)
-
-BOOST_AUTO_TEST_CASE(varnish_load_valid_tiff) {
+TEST(varnish_tests, varnish_load_valid_tiff) { // NOLINT
   SliLayer::Ptr test_varnishLayer = SliLayer::create(
       TestFiles::getPathToFile("v_valid.tif"), "SomeCoolTitle", 0, 0);
   test_varnishLayer->fillMetaFromTiff(8, 1);
   test_varnishLayer->fillBitmapFromTiff();
   Varnish::Ptr test_varnish = Varnish::create(test_varnishLayer);
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnish->layer->name == "SomeCoolTitle");
-  BOOST_REQUIRE(test_varnish->layer->filepath ==
-                TestFiles::getPathToFile("v_valid.tif"));
-  BOOST_REQUIRE(test_varnish->layer->width == 20);
-  BOOST_REQUIRE(test_varnish->layer->height == 20);
-  BOOST_REQUIRE(test_varnish->layer->xoffset == 0);
-  BOOST_REQUIRE(test_varnish->layer->yoffset == 0);
-  BOOST_REQUIRE(test_varnish->layer->xAspect == 1);
-  BOOST_REQUIRE(test_varnish->layer->yAspect == 1);
-  BOOST_REQUIRE(test_varnish->inverted == false);
+  EXPECT_EQ(test_varnish->layer->name, "SomeCoolTitle");
+  EXPECT_EQ(test_varnish->layer->filepath,
+            TestFiles::getPathToFile("v_valid.tif"));
+  EXPECT_EQ(test_varnish->layer->width, 20);
+  EXPECT_EQ(test_varnish->layer->height, 20);
+  EXPECT_EQ(test_varnish->layer->xoffset, 0);
+  EXPECT_EQ(test_varnish->layer->yoffset, 0);
+  EXPECT_EQ(test_varnish->layer->xAspect, 1);
+  EXPECT_EQ(test_varnish->layer->yAspect, 1);
+  EXPECT_FALSE(test_varnish->inverted);
   // Valid cairo surface?
-  BOOST_REQUIRE(test_varnish->surface);
+  EXPECT_TRUE(test_varnish->surface);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_valid_tiff_centimeter) {
+TEST(varnish_tests, varnish_load_valid_tiff_centimeter) { // NOLINT
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_valid_centimeter.tif"),
                        "SomeCoolTitle", 0, 0);
@@ -89,21 +83,21 @@ BOOST_AUTO_TEST_CASE(varnish_load_valid_tiff_centimeter) {
   test_varnishLayer->fillBitmapFromTiff();
   Varnish::Ptr test_varnish = Varnish::create(test_varnishLayer);
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnish->layer->name == "SomeCoolTitle");
-  BOOST_REQUIRE(test_varnish->layer->filepath ==
-                TestFiles::getPathToFile("v_valid_centimeter.tif"));
-  BOOST_REQUIRE(test_varnish->layer->width == 20);
-  BOOST_REQUIRE(test_varnish->layer->height == 20);
-  BOOST_REQUIRE(test_varnish->layer->xoffset == 0);
-  BOOST_REQUIRE(test_varnish->layer->yoffset == 0);
-  BOOST_REQUIRE(test_varnish->layer->xAspect == 1);
-  BOOST_REQUIRE(test_varnish->layer->yAspect == 1);
-  BOOST_REQUIRE(test_varnish->inverted == false);
+  EXPECT_EQ(test_varnish->layer->name, "SomeCoolTitle");
+  EXPECT_EQ(test_varnish->layer->filepath,
+            TestFiles::getPathToFile("v_valid_centimeter.tif"));
+  EXPECT_EQ(test_varnish->layer->width, 20);
+  EXPECT_EQ(test_varnish->layer->height, 20);
+  EXPECT_EQ(test_varnish->layer->xoffset, 0);
+  EXPECT_EQ(test_varnish->layer->yoffset, 0);
+  EXPECT_EQ(test_varnish->layer->xAspect, 1);
+  EXPECT_EQ(test_varnish->layer->yAspect, 1);
+  EXPECT_FALSE(test_varnish->inverted);
   // Valid cairo surface?
-  BOOST_REQUIRE(test_varnish->surface);
+  EXPECT_TRUE(test_varnish->surface);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_valid_tiff_no_spp_tag) {
+TEST(varnish_tests, varnish_load_valid_tiff_no_spp_tag) { // NOLINT
   // This test file does not have a SamplePerPixel tag set, but should default
   // to 1 spp
   SliLayer::Ptr test_varnishLayer =
@@ -113,133 +107,132 @@ BOOST_AUTO_TEST_CASE(varnish_load_valid_tiff_no_spp_tag) {
   test_varnishLayer->fillBitmapFromTiff();
   Varnish::Ptr test_varnish = Varnish::create(test_varnishLayer);
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnish->layer->name == "SomeCoolTitle");
-  BOOST_REQUIRE(test_varnish->layer->filepath ==
-                TestFiles::getPathToFile("v_valid_no_spp_tag.tif"));
-  BOOST_REQUIRE(test_varnish->layer->width == 20);
-  BOOST_REQUIRE(test_varnish->layer->height == 20);
-  BOOST_REQUIRE(test_varnish->layer->xoffset == 0);
-  BOOST_REQUIRE(test_varnish->layer->yoffset == 0);
-  BOOST_REQUIRE(test_varnish->layer->xAspect == 1);
-  BOOST_REQUIRE(test_varnish->layer->yAspect == 1);
-  BOOST_REQUIRE(test_varnish->inverted == false);
+  EXPECT_EQ(test_varnish->layer->name, "SomeCoolTitle");
+  EXPECT_EQ(test_varnish->layer->filepath,
+            TestFiles::getPathToFile("v_valid_no_spp_tag.tif"));
+  EXPECT_EQ(test_varnish->layer->width, 20);
+  EXPECT_EQ(test_varnish->layer->height, 20);
+  EXPECT_EQ(test_varnish->layer->xoffset, 0);
+  EXPECT_EQ(test_varnish->layer->yoffset, 0);
+  EXPECT_EQ(test_varnish->layer->xAspect, 1);
+  EXPECT_EQ(test_varnish->layer->yAspect, 1);
+  EXPECT_FALSE(test_varnish->inverted);
   // Valid cairo surface?
-  BOOST_REQUIRE(test_varnish->surface);
+  EXPECT_TRUE(test_varnish->surface);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_invalid_tiff) {
+TEST(varnish_tests, varnish_load_invalid_tiff) { // NOLINT
   SliLayer::Ptr test_varnishLayer = SliLayer::create(
       TestFiles::getPathToFile("v_invalidrgb.tif"), "Another Title", 0, 0);
   // Tif handling should fail here
-  BOOST_REQUIRE(!test_varnishLayer->fillMetaFromTiff(8, 1));
+  EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnishLayer->name == "Another Title");
-  BOOST_REQUIRE(test_varnishLayer->filepath ==
-                TestFiles::getPathToFile("v_invalidrgb.tif"));
-  BOOST_REQUIRE(test_varnishLayer->width == 0);
-  BOOST_REQUIRE(test_varnishLayer->height == 0);
-  BOOST_REQUIRE(test_varnishLayer->xoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->yoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->xAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->yAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->bitmap == nullptr);
+  EXPECT_EQ(test_varnishLayer->name, "Another Title");
+  EXPECT_EQ(test_varnishLayer->filepath,
+            TestFiles::getPathToFile("v_invalidrgb.tif"));
+  EXPECT_EQ(test_varnishLayer->width, 0);
+  EXPECT_EQ(test_varnishLayer->height, 0);
+  EXPECT_EQ(test_varnishLayer->xoffset, 0);
+  EXPECT_EQ(test_varnishLayer->yoffset, 0);
+  EXPECT_EQ(test_varnishLayer->xAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->yAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->bitmap, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_zero_res_tiff) {
-  // This test file is missinga width tag
+TEST(varnish_tests, varnish_load_zero_res_tiff) { // NOLINT
+  // This test file is missing a width tag
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_invalid_no_width.tif"),
                        "Another Title", 0, 0);
   // Tif handling should fail here
-  BOOST_REQUIRE(!test_varnishLayer->fillMetaFromTiff(8, 1));
+  EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnishLayer->name == "Another Title");
-  BOOST_REQUIRE(test_varnishLayer->filepath ==
-                TestFiles::getPathToFile("v_invalid_no_width.tif"));
-  BOOST_REQUIRE(test_varnishLayer->width == 0);
-  BOOST_REQUIRE(test_varnishLayer->height == 0);
-  BOOST_REQUIRE(test_varnishLayer->xoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->yoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->xAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->yAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->bitmap == nullptr);
+  EXPECT_EQ(test_varnishLayer->name, "Another Title");
+  EXPECT_EQ(test_varnishLayer->filepath,
+            TestFiles::getPathToFile("v_invalid_no_width.tif"));
+  EXPECT_EQ(test_varnishLayer->width, 0);
+  EXPECT_EQ(test_varnishLayer->height, 0);
+  EXPECT_EQ(test_varnishLayer->xoffset, 0);
+  EXPECT_EQ(test_varnishLayer->yoffset, 0);
+  EXPECT_EQ(test_varnishLayer->xAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->yAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->bitmap, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_corrupted_tiff) {
+TEST(varnish_tests, varnish_load_corrupted_tiff) { // NOLINT
   // This test files magic number and file data was randomly edited.
   SliLayer::Ptr test_varnishLayer = SliLayer::create(
       TestFiles::getPathToFile("v_corrupted.tif"), "Another Title", 0, 0);
   // Tif handling should fail here
-  BOOST_REQUIRE(!test_varnishLayer->fillMetaFromTiff(8, 1));
+  EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnishLayer->name == "Another Title");
-  BOOST_REQUIRE(test_varnishLayer->filepath ==
-                TestFiles::getPathToFile("v_corrupted.tif"));
-  BOOST_REQUIRE(test_varnishLayer->width == 0);
-  BOOST_REQUIRE(test_varnishLayer->height == 0);
-  BOOST_REQUIRE(test_varnishLayer->xoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->yoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->xAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->yAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->bitmap == nullptr);
+  EXPECT_EQ(test_varnishLayer->name, "Another Title");
+  EXPECT_EQ(test_varnishLayer->filepath,
+            TestFiles::getPathToFile("v_corrupted.tif"));
+  EXPECT_EQ(test_varnishLayer->width, 0);
+  EXPECT_EQ(test_varnishLayer->height, 0);
+  EXPECT_EQ(test_varnishLayer->xoffset, 0);
+  EXPECT_EQ(test_varnishLayer->yoffset, 0);
+  EXPECT_EQ(test_varnishLayer->xAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->yAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->bitmap, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_nonexistent_tiff) {
+TEST(varnish_tests, varnish_load_nonexistent_tiff) { // NOLINT
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_nonexistent.tif"),
                        "This file doesn't exist", 0, 0);
   // Tif handling should fail here
-  BOOST_REQUIRE(!test_varnishLayer->fillMetaFromTiff(8, 1));
+  EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnishLayer->name == "This file doesn't exist");
-  BOOST_REQUIRE(test_varnishLayer->filepath ==
-                TestFiles::getPathToFile("v_nonexistent.tif"));
-  BOOST_REQUIRE(test_varnishLayer->width == 0);
-  BOOST_REQUIRE(test_varnishLayer->height == 0);
-  BOOST_REQUIRE(test_varnishLayer->xoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->yoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->xAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->yAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->bitmap == nullptr);
+  EXPECT_EQ(test_varnishLayer->name, "This file doesn't exist");
+  EXPECT_EQ(test_varnishLayer->filepath,
+            TestFiles::getPathToFile("v_nonexistent.tif"));
+  EXPECT_EQ(test_varnishLayer->width, 0);
+  EXPECT_EQ(test_varnishLayer->height, 0);
+  EXPECT_EQ(test_varnishLayer->xoffset, 0);
+  EXPECT_EQ(test_varnishLayer->yoffset, 0);
+  EXPECT_EQ(test_varnishLayer->xAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->yAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->bitmap, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(varnish_load_1bps_tiff) {
+TEST(varnish_tests, varnish_load_1bps_tiff) { // NOLINT
   // This test file has 1 bps, which is not supported
   SliLayer::Ptr test_varnishLayer = SliLayer::create(
       TestFiles::getPathToFile("v_invalid1bps.tif"), "TitleGoesHere", 0, 0);
   // Tif handling should fail here
-  BOOST_REQUIRE(!test_varnishLayer->fillMetaFromTiff(8, 1));
+  EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnishLayer->name == "TitleGoesHere");
-  BOOST_REQUIRE(test_varnishLayer->filepath ==
-                TestFiles::getPathToFile("v_invalid1bps.tif"));
-  BOOST_REQUIRE(test_varnishLayer->width == 0);
-  BOOST_REQUIRE(test_varnishLayer->height == 0);
-  BOOST_REQUIRE(test_varnishLayer->xoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->yoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->xAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->yAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->bitmap == nullptr);
+  EXPECT_EQ(test_varnishLayer->name, "TitleGoesHere");
+  EXPECT_EQ(test_varnishLayer->filepath,
+            TestFiles::getPathToFile("v_invalid1bps.tif"));
+  EXPECT_EQ(test_varnishLayer->width, 0);
+  EXPECT_EQ(test_varnishLayer->height, 0);
+  EXPECT_EQ(test_varnishLayer->xoffset, 0);
+  EXPECT_EQ(test_varnishLayer->yoffset, 0);
+  EXPECT_EQ(test_varnishLayer->xAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->yAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->bitmap, nullptr);
 }
-BOOST_AUTO_TEST_CASE(varnish_load_invalid_no_bps_tiff) {
+
+TEST(varnish_tests, varnish_load_invalid_no_bps_tiff) { // NOLINT
   // This test file doesn't have a bps tag, thus will default to 1 bps. 1bps is
   // not supported for varnish
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_invalid_no_bps_tag.tif"),
                        "TitleGoesHere", 0, 0);
   // Tif handling should fail here
-  BOOST_REQUIRE(!test_varnishLayer->fillMetaFromTiff(8, 1));
+  EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
-  BOOST_REQUIRE(test_varnishLayer->name == "TitleGoesHere");
-  BOOST_REQUIRE(test_varnishLayer->filepath ==
-                TestFiles::getPathToFile("v_invalid_no_bps_tag.tif"));
-  BOOST_REQUIRE(test_varnishLayer->width == 0);
-  BOOST_REQUIRE(test_varnishLayer->height == 0);
-  BOOST_REQUIRE(test_varnishLayer->xoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->yoffset == 0);
-  BOOST_REQUIRE(test_varnishLayer->xAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->yAspect == 0.0f);
-  BOOST_REQUIRE(test_varnishLayer->bitmap == nullptr);
+  EXPECT_EQ(test_varnishLayer->name, "TitleGoesHere");
+  EXPECT_EQ(test_varnishLayer->filepath,
+            TestFiles::getPathToFile("v_invalid_no_bps_tag.tif"));
+  EXPECT_EQ(test_varnishLayer->width, 0);
+  EXPECT_EQ(test_varnishLayer->height, 0);
+  EXPECT_EQ(test_varnishLayer->xoffset, 0);
+  EXPECT_EQ(test_varnishLayer->yoffset, 0);
+  EXPECT_EQ(test_varnishLayer->xAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->yAspect, 0.0f);
+  EXPECT_EQ(test_varnishLayer->bitmap, nullptr);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

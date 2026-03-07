@@ -1,97 +1,84 @@
-#include <boost/dll.hpp>
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
 #include <cmath>
 
 #include "../seppresentation.hh"
 #include "testglobals.hh"
 
-/** Test cases for seppresentation.hh */
-
-BOOST_AUTO_TEST_SUITE(SepPresentation_Tests)
-
-BOOST_AUTO_TEST_CASE(seppresentation_create) {
+TEST(SepPresentation_Tests, seppresentation_create) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK(presentation != nullptr);
+  EXPECT_NE(presentation, nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_load_false) {
+TEST(SepPresentation_Tests, seppresentation_load_false) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(
-      presentation->load(TestFiles::getPathToFile("sep_test.sep")), false);
-  BOOST_CHECK_EQUAL(presentation->width, 0);
-  BOOST_CHECK_EQUAL(presentation->height, 0);
+  EXPECT_FALSE(presentation->load(TestFiles::getPathToFile("sep_test.sep")));
+  EXPECT_EQ(presentation->width, 0);
+  EXPECT_EQ(presentation->height, 0);
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_load_false_2) {
+TEST(SepPresentation_Tests, seppresentation_load_false_2) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(presentation->load(""), false);
-  BOOST_CHECK_EQUAL(presentation->width, 0);
-  BOOST_CHECK_EQUAL(presentation->height, 0);
+  EXPECT_FALSE(presentation->load(""));
+  EXPECT_EQ(presentation->width, 0);
+  EXPECT_EQ(presentation->height, 0);
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_load_true) {
+TEST(SepPresentation_Tests, seppresentation_load_true) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(
-      presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")), true);
-  BOOST_CHECK_EQUAL(presentation->width, 600);
-  BOOST_CHECK_EQUAL(presentation->height, 400);
+  EXPECT_TRUE(presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")));
+  EXPECT_EQ(presentation->width, 600);
+  EXPECT_EQ(presentation->height, 400);
   for (auto c : presentation->sep_source->channels) {
-    BOOST_CHECK(presentation->sep_source->channel_files[c] != nullptr);
+    EXPECT_NE(presentation->sep_source->channel_files[c], nullptr);
   }
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_getTitle) {
+TEST(SepPresentation_Tests, seppresentation_getTitle) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(
-      presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")), true);
-  BOOST_CHECK_EQUAL(presentation->getTitle(),
-                    TestFiles::getPathToFile("sep_cmyk.sep"));
+  EXPECT_TRUE(presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")));
+  EXPECT_EQ(presentation->getTitle(), TestFiles::getPathToFile("sep_cmyk.sep"));
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_getTransform) {
+TEST(SepPresentation_Tests, seppresentation_getTransform) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(
-      presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")), true);
-  BOOST_CHECK(presentation->getTransform() != nullptr);
+  EXPECT_TRUE(presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")));
+  EXPECT_NE(presentation->getTransform(), nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_getRect) {
+TEST(SepPresentation_Tests, seppresentation_getRect) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(
-      presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")), true);
+  EXPECT_TRUE(presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")));
   auto rect = presentation->getRect();
-  BOOST_CHECK(rect.getTop() == 0);
-  BOOST_CHECK(rect.getLeft() == 0);
-  BOOST_CHECK(rect.getWidth() == 600);
-  BOOST_CHECK(rect.getHeight() == 400);
+  EXPECT_EQ(rect.getTop(), 0);
+  EXPECT_EQ(rect.getLeft(), 0);
+  EXPECT_EQ(rect.getWidth(), 600);
+  EXPECT_EQ(rect.getHeight(), 400);
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_getViews) {
+TEST(SepPresentation_Tests, seppresentation_getViews) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
   auto views = presentation->getViews();
-  BOOST_CHECK(views.empty());
+  EXPECT_TRUE(views.empty());
 }
 
-BOOST_AUTO_TEST_CASE(seppresentation_pipette) {
+TEST(SepPresentation_Tests, seppresentation_pipette) { // NOLINT
   SepPresentation::Ptr presentation = SepPresentation::create();
-  BOOST_CHECK_EQUAL(
-      presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")), true);
+  EXPECT_TRUE(presentation->load(TestFiles::getPathToFile("sep_cmyk.sep")));
   auto rect = presentation->getRect();
-  BOOST_CHECK(rect.getTop() == 0);
-  BOOST_CHECK(rect.getLeft() == 0);
-  BOOST_CHECK(rect.getWidth() == 600);
-  BOOST_CHECK(rect.getHeight() == 400);
+  EXPECT_EQ(rect.getTop(), 0);
+  EXPECT_EQ(rect.getLeft(), 0);
+  EXPECT_EQ(rect.getWidth(), 600);
+  EXPECT_EQ(rect.getHeight(), 400);
 
   for (auto c : presentation->sep_source->channels) {
-    BOOST_CHECK(presentation->sep_source->channel_files[c] != nullptr);
+    EXPECT_NE(presentation->sep_source->channel_files[c], nullptr);
   }
 
   auto averages = presentation->getPixelAverages(rect);
 
   for (auto &avg : averages) {
-    BOOST_CHECK(!avg.first.empty());
-    BOOST_CHECK(!std::isnan(avg.second));
+    EXPECT_FALSE(avg.first.empty());
+    EXPECT_FALSE(std::isnan(avg.second));
   }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

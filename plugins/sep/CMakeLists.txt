@@ -48,12 +48,11 @@ target_link_libraries(
 install(TARGETS spsep DESTINATION ${PLUGIN_INSTALL_LOCATION_RELATIVE})
 install_plugin_dependencies(spsep)
 
-if(ENABLE_BOOST_TEST)
+if(ENABLE_GOOGLE_TEST)
   add_executable(spsep_tests)
   target_sources(
     spsep_tests
-    PRIVATE test/main.cc
-            test/colorhelpers-tests.cc
+    PRIVATE test/colorhelpers-tests.cc
             test/coloroperations-tests.cc
             test/colorconfig-tests.cc
             test/sep-tests.cc
@@ -64,16 +63,19 @@ if(ENABLE_BOOST_TEST)
             test/slipresentation-tests.cc
             test/slisource-tests.cc
             test/varnish-tests.cc
+            test/testglobals.cc
             test/testglobals.hh)
   target_include_directories(spsep_tests PRIVATE . sli varnish)
   target_link_libraries(
     spsep_tests
-    PRIVATE boosttesthelper
-            # Boost::chrono
+    PRIVATE gmock_main
             project_options
             project_warnings
             spsep
             util)
 
-  add_test(NAME spsep_tests COMMAND spsep_tests -- ${CMAKE_CURRENT_SOURCE_DIR}/test/testfiles)
+  add_test(NAME spsep_tests COMMAND spsep_tests)
+  target_compile_definitions(
+    spsep_tests
+    PRIVATE TESTFILES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/testfiles")
 endif()

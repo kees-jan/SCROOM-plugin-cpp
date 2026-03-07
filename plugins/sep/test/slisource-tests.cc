@@ -1,26 +1,26 @@
-#include <boost/dll.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
+#include <chrono>
+#include <stdexcept>
+#include <thread>
 
 #include "../sli/slipresentation.hh"
+#include "testglobals.hh"
 #include <scroom/scroominterface.hh>
 
-#define SLI_NOF_LAYERS 4
-
-#include "testglobals.hh"
+constexpr size_t SLI_NOF_LAYERS = 4;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper functions
 
-void dummyFunc1() {}
-
 SliPresentation::Ptr createPresentation1() {
   SliPresentation::Ptr presentation = SliPresentation::create(nullptr);
-  BOOST_REQUIRE(presentation);
+  EXPECT_NE(presentation, nullptr);
+  if(!presentation)
+    throw std::runtime_error("SliPresentation::create returned null");
   // Assign the callbacks to dummy functions to avoid exceptions
-  presentation->source->enableInteractions = boost::bind(dummyFunc1);
-  presentation->source->disableInteractions = boost::bind(dummyFunc1);
-
+  presentation->source->enableInteractions = []{};
+  presentation->source->disableInteractions = []{};
   return presentation;
 }
 
@@ -31,24 +31,22 @@ void dummyRedraw1(SliPresentation::Ptr presentation) {
   cairo_t *cr = cairo_create(surface);
   Scroom::Utils::Rectangle<double> rect(0.0, 0.0, 100.0, 100.0);
 
-  boost::this_thread::sleep(boost::posix_time::millisec(500));
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   // redraw() for all zoom levels from 5 to -2 and check whether cache has been
   // computed
   for (int zoom = 5; zoom > -3; zoom--) {
     presentation->redraw(nullptr, cr, rect, zoom);
-    boost::this_thread::sleep(boost::posix_time::millisec(
-        1000)); // Very liberal, shouldn't fail beause of time
-    BOOST_REQUIRE(presentation->source->rgbCache.at(std::min(0, zoom)));
+    std::this_thread::sleep_for(std::chrono::milliseconds(
+        1000)); // Very liberal, shouldn't fail because of time
+    ASSERT_TRUE(presentation->source->rgbCache.at(std::min(0, zoom)));
   }
-  BOOST_REQUIRE(presentation);
+  ASSERT_NE(presentation, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tests
 
-BOOST_AUTO_TEST_SUITE(Sli_Tests)
-
-BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_all_toggled) {
+TEST(Sli_Tests, slisource_clearbottomsurface_all_toggled) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation1();
 
   presentation->load(TestFiles::getPathToFile("sli_tiffonly.sli"));
@@ -65,10 +63,10 @@ BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_all_toggled) {
       break;
     }
   }
-  BOOST_REQUIRE(allZero == true);
+  EXPECT_TRUE(allZero);
 }
 
-BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_none_toggled) {
+TEST(Sli_Tests, slisource_clearbottomsurface_none_toggled) { // NOLINT
   SliPresentation::Ptr presentation1 = createPresentation1();
   SliPresentation::Ptr presentation2 = createPresentation1();
 
@@ -89,10 +87,10 @@ BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_none_toggled) {
       break;
     }
   }
-  BOOST_REQUIRE(bothEqual == true);
+  EXPECT_TRUE(bothEqual);
 }
 
-BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_some_toggled) {
+TEST(Sli_Tests, slisource_clearbottomsurface_some_toggled) { // NOLINT
   SliPresentation::Ptr presentation1 = createPresentation1();
   SliPresentation::Ptr presentation2 = createPresentation1();
 
@@ -117,7 +115,7 @@ BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_some_toggled) {
       break;
     }
   }
-  BOOST_REQUIRE(someZero == true);
+  EXPECT_TRUE(someZero);
 
   bool bothEqual = true;
   for (int i = height * width * 4; i < total_height * total_width * 4; i++) {
@@ -126,13 +124,13 @@ BOOST_AUTO_TEST_CASE(slisource_clearbottomsurface_some_toggled) {
       break;
     }
   }
-  BOOST_REQUIRE(bothEqual == true);
+  EXPECT_TRUE(bothEqual);
 }
 
 // tinycmyk.tif (cmyk) = [(255,0,0,0),(0,255,0,0),(0,0,255,0),(0,0,0,255)]
 // tinycmyk.tif (bgra) =
 //              [(255,255,0,255),(255,0,255,255),(0,255,255,255),(0,0,0,255)]
-BOOST_AUTO_TEST_CASE(slisource_computergb_yoffset) {
+TEST(Sli_Tests, slisource_computergb_yoffset) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation1();
   presentation->load(TestFiles::getPathToFile("sli_tinycmyk.sli"));
   dummyRedraw1(presentation);
@@ -143,11 +141,11 @@ BOOST_AUTO_TEST_CASE(slisource_computergb_yoffset) {
                         0,   255, 255, 255, 0,   0, 0,   255};
 
   for (int i = 0; i < 2 * 2 * 4; i++) {
-    BOOST_REQUIRE(surface[i] == tinycmyk[i]);
+    EXPECT_EQ(surface[i], tinycmyk[i]);
   }
 }
 
-BOOST_AUTO_TEST_CASE(slisource_computergb_xoffset) {
+TEST(Sli_Tests, slisource_computergb_xoffset) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation1();
   presentation->load(TestFiles::getPathToFile("sli_tinycmyk_xoffset.sli"));
   dummyRedraw1(presentation);
@@ -158,8 +156,6 @@ BOOST_AUTO_TEST_CASE(slisource_computergb_xoffset) {
                         0, 0, 0, 0, 0,   255, 255, 255, 0,   0, 0,   255};
 
   for (int i = 0; i < 2 * 3 * 4; i++) {
-    BOOST_REQUIRE(surface[i] == tinycmyk[i]);
+    EXPECT_EQ(surface[i], tinycmyk[i]);
   }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -1,26 +1,26 @@
-#include <boost/dll.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
+
+#include <chrono>
+#include <stdexcept>
+#include <thread>
 
 #include "../sli/slipresentation.hh"
+#include "testglobals.hh"
 #include <scroom/scroominterface.hh>
 
-#define SLI_NOF_LAYERS 4
-
-#include "testglobals.hh"
+constexpr size_t SLI_NOF_LAYERS = 4;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helper functions
 
-void dummyFunc() {}
-
 SliPresentation::Ptr createPresentation() {
   SliPresentation::Ptr presentation = SliPresentation::create(nullptr);
-  BOOST_REQUIRE(presentation);
+  EXPECT_NE(presentation, nullptr);
+  if(!presentation)
+    throw std::runtime_error("SliPresentation::create returned null");
   // Assign the callbacks to dummy functions to avoid exceptions
-  presentation->source->enableInteractions = boost::bind(dummyFunc);
-  presentation->source->disableInteractions = boost::bind(dummyFunc);
-
+  presentation->source->enableInteractions = []{};
+  presentation->source->disableInteractions = []{};
   return presentation;
 }
 
@@ -31,11 +31,10 @@ void dummyRedraw(SliPresentation::Ptr presentation) {
   cairo_t *cr = cairo_create(surface);
   Scroom::Utils::Rectangle<double> rect(0.0, 0.0, 100.0, 100.0);
 
-  boost::this_thread::sleep(boost::posix_time::millisec(500));
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   // redraw() for all zoom levels from 5 to -2 and check whether cache has been
   // computed
 
-  BOOST_REQUIRE(presentation);
   for (int zoom = 5; zoom > -3; zoom--) {
     presentation->redraw(nullptr, cr, rect, zoom);
     for (int retries = 100;
@@ -43,133 +42,127 @@ void dummyRedraw(SliPresentation::Ptr presentation) {
          (!presentation->source ||
           !presentation->source->rgbCache.count(std::min(0, zoom)));
          retries--) {
-      boost::this_thread::sleep(boost::posix_time::millisec(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    BOOST_CHECK(presentation->source->rgbCache.at(std::min(0, zoom)));
+    EXPECT_TRUE(presentation->source->rgbCache.at(std::min(0, zoom)));
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Tests
 
-BOOST_AUTO_TEST_SUITE(Sli_Tests)
-
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_tiffonly) {
+TEST(Sli_Tests, slipresentation_load_sli_tiffonly) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_tiffonly.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == SLI_NOF_LAYERS);
+  ASSERT_EQ(presentation->getLayers().size(), SLI_NOF_LAYERS);
   dummyRedraw(presentation);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_seponly) {
+TEST(Sli_Tests, slipresentation_load_sli_seponly) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_seponly.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == SLI_NOF_LAYERS);
+  ASSERT_EQ(presentation->getLayers().size(), SLI_NOF_LAYERS);
   dummyRedraw(presentation);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_septiffmixed) {
+TEST(Sli_Tests, slipresentation_load_sli_septiffmixed) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_septiffmixed.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == SLI_NOF_LAYERS);
+  ASSERT_EQ(presentation->getLayers().size(), SLI_NOF_LAYERS);
   dummyRedraw(presentation);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_scale) {
+TEST(Sli_Tests, slipresentation_load_sli_scale) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_scale.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == SLI_NOF_LAYERS);
+  ASSERT_EQ(presentation->getLayers().size(), SLI_NOF_LAYERS);
   dummyRedraw(presentation);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_xoffset) {
+TEST(Sli_Tests, slipresentation_load_sli_xoffset) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_xoffset.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == SLI_NOF_LAYERS);
+  ASSERT_EQ(presentation->getLayers().size(), SLI_NOF_LAYERS);
   dummyRedraw(presentation);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_varnish) {
+TEST(Sli_Tests, slipresentation_load_sli_varnish) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_varnish.sli"));
   std::cout << presentation->getLayers().size() << '\n';
-  BOOST_REQUIRE(presentation->getLayers().size() == SLI_NOF_LAYERS);
+  ASSERT_EQ(presentation->getLayers().size(), SLI_NOF_LAYERS);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_load_sli_varnish_wrongpath) {
+TEST(Sli_Tests, slipresentation_load_sli_varnish_wrongpath) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_varnish_wrongpath.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == 0);
+  ASSERT_EQ(presentation->getLayers().size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_presentationinterface_inherited) {
+TEST(Sli_Tests, slipresentation_presentationinterface_inherited) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPath());
 
   std::string nameStr = "testname";
   std::string valueStr;
 
-  BOOST_REQUIRE(presentation->isPropertyDefined(nameStr) == false);
-  BOOST_REQUIRE(presentation->getProperty(nameStr, valueStr) == false);
-  BOOST_REQUIRE(valueStr == "");
+  ASSERT_FALSE(presentation->isPropertyDefined(nameStr));
+  ASSERT_FALSE(presentation->getProperty(nameStr, valueStr));
+  ASSERT_EQ(valueStr, "");
 
   presentation->properties["testname"] = "testvalue";
 
-  BOOST_REQUIRE(presentation->isPropertyDefined(nameStr) == true);
-  BOOST_REQUIRE(presentation->getProperty(nameStr, valueStr) == true);
-  BOOST_REQUIRE(valueStr == "testvalue");
+  ASSERT_TRUE(presentation->isPropertyDefined(nameStr));
+  ASSERT_TRUE(presentation->getProperty(nameStr, valueStr));
+  ASSERT_EQ(valueStr, "testvalue");
 
-  BOOST_REQUIRE(presentation->getTitle() == TestFiles::getPath());
+  ASSERT_EQ(presentation->getTitle(), TestFiles::getPath());
 
   presentation.reset();
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_pipette_tool_multiple_colors) {
+TEST(Sli_Tests, slipresentation_pipette_tool_multiple_colors) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
-
   presentation->load(TestFiles::getPathToFile("sli_pipette.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == 1);
+  ASSERT_EQ(presentation->getLayers().size(), 1u);
   dummyRedraw(presentation);
   // Testing 4 CMYK pixels + rectangle larger than the canvas
   Scroom::Utils::Rectangle<double> rect1{0, 0, 3, 4};
   auto result = presentation->getPixelAverages(rect1);
   for (auto r : result)
-    BOOST_REQUIRE(abs(r.second - 63.75) < 0.0001);
+    EXPECT_NEAR(r.second, 63.75, 0.0001);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_pipette_tool_one_color) {
+TEST(Sli_Tests, slipresentation_pipette_tool_one_color) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
-
   presentation->load(TestFiles::getPathToFile("sli_pipette.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == 1);
+  ASSERT_EQ(presentation->getLayers().size(), 1u);
   dummyRedraw(presentation);
   // C
   Scroom::Utils::Rectangle<double> rect1{0, 0, 1, 1};
   auto result = presentation->getPixelAverages(rect1);
-  BOOST_REQUIRE(abs(result[0].second - 255) < 0.0001);
+  EXPECT_NEAR(result[0].second, 255, 0.0001);
   // M
   Scroom::Utils::Rectangle<double> rect2{1, 0, 1, 1};
   result = presentation->getPixelAverages(rect2);
-  BOOST_REQUIRE(abs(result[1].second - 255) < 0.0001);
+  EXPECT_NEAR(result[1].second, 255, 0.0001);
   // Y
   Scroom::Utils::Rectangle<double> rect3{0, 1, 1, 1};
   result = presentation->getPixelAverages(rect3);
-  BOOST_REQUIRE(abs(result[2].second - 255) < 0.0001);
+  EXPECT_NEAR(result[2].second, 255, 0.0001);
   // K
   Scroom::Utils::Rectangle<double> rect4{1, 1, 1, 1};
   result = presentation->getPixelAverages(rect4);
-  BOOST_REQUIRE(abs(result[3].second - 255) < 0.0001);
+  EXPECT_NEAR(result[3].second, 255, 0.0001);
 }
 
-BOOST_AUTO_TEST_CASE(slipresentation_pipette_tool_zero_area) {
+TEST(Sli_Tests, slipresentation_pipette_tool_zero_area) { // NOLINT
   SliPresentation::Ptr presentation = createPresentation();
   presentation->load(TestFiles::getPathToFile("sli_pipette.sli"));
-  BOOST_REQUIRE(presentation->getLayers().size() == 1);
+  ASSERT_EQ(presentation->getLayers().size(), 1u);
   dummyRedraw(presentation);
 
   Scroom::Utils::Rectangle<double> rect1{0, 0, 0, 0};
   auto result = presentation->getPixelAverages(rect1);
-  BOOST_REQUIRE(result.empty());
+  EXPECT_TRUE(result.empty());
 }
-
-BOOST_AUTO_TEST_SUITE_END()

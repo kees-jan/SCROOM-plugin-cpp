@@ -1,54 +1,40 @@
-//
-// Created by developer on 17-06-21.
-//
-
-#include <boost/dll.hpp>
-#include <boost/test/unit_test.hpp>
+#include <gtest/gtest.h>
 
 #include "../colorconfig/CustomColorConfig.hh"
 #include "testglobals.hh"
 
-BOOST_AUTO_TEST_SUITE(ColorConfig_Tests)
-
-BOOST_AUTO_TEST_CASE(colorConfig_create) {
+TEST(ColorConfig_Tests, colorConfig_create) { // NOLINT
   ColorConfig();
   ColorConfig colorConfig;
-  BOOST_CHECK(colorConfig.getDefinedColors().size() == 0);
+  EXPECT_EQ(colorConfig.getDefinedColors().size(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(colorConfig_load_without_file) {
+TEST(ColorConfig_Tests, colorConfig_load_without_file) { // NOLINT
   ColorConfig colorConfig;
-
   colorConfig.loadFile();
-  BOOST_CHECK(colorConfig.getDefinedColors().size() == 4);
+  EXPECT_EQ(colorConfig.getDefinedColors().size(), 4u);
 }
 
-BOOST_AUTO_TEST_CASE(colorConfig_load_with_file) {
+TEST(ColorConfig_Tests, colorConfig_load_with_file) { // NOLINT
   ColorConfig colorConfig;
-
   colorConfig.loadFile(TestFiles::getPathToFile("colours.json"));
-  BOOST_CHECK(colorConfig.getDefinedColors().size() == 5);
+  EXPECT_EQ(colorConfig.getDefinedColors().size(), 5u);
 }
 
-BOOST_AUTO_TEST_CASE(colorConfig_non_existent) {
+TEST(ColorConfig_Tests, colorConfig_non_existent) { // NOLINT
   ColorConfig colorConfig;
-
   colorConfig.addNonExistentDefaultColors();
-  BOOST_CHECK(colorConfig.getDefinedColors().size() == 4);
+  EXPECT_EQ(colorConfig.getDefinedColors().size(), 4u);
 }
 
-BOOST_AUTO_TEST_CASE(colorConfig_get_default_name) {
+TEST(ColorConfig_Tests, colorConfig_get_default_name) { // NOLINT
   ColorConfig colorConfig;
-
   colorConfig.addNonExistentDefaultColors();
-  BOOST_CHECK(colorConfig.getColorByNameOrAlias("c") != nullptr);
+  EXPECT_NE(colorConfig.getColorByNameOrAlias("c"), nullptr);
 }
 
-BOOST_AUTO_TEST_CASE(colorConfig_get_name) {
+TEST(ColorConfig_Tests, colorConfig_get_name) { // NOLINT
   ColorConfig colorConfig;
-
   colorConfig.loadFile(TestFiles::getPathToFile("colours.json"));
-  BOOST_CHECK(colorConfig.getColorByNameOrAlias("b") != nullptr);
+  EXPECT_NE(colorConfig.getColorByNameOrAlias("b"), nullptr);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
