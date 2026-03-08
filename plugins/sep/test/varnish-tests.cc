@@ -11,9 +11,9 @@
 class DummyViewInterface : public ViewInterface {
 
 public:
-  DummyViewInterface(){};
-  ~DummyViewInterface(){};
-  void invalidate(){};
+  DummyViewInterface() {};
+  ~DummyViewInterface() {};
+  void invalidate() {};
   ProgressInterface::Ptr getProgressInterface() { return nullptr; }
 
   static ViewInterface::Ptr create() {

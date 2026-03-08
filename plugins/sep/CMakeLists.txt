@@ -75,7 +75,5 @@ if(ENABLE_GOOGLE_TEST)
             util)
 
   add_test(NAME spsep_tests COMMAND spsep_tests)
-  target_compile_definitions(
-    spsep_tests
-    PRIVATE TESTFILES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/testfiles")
+  target_compile_definitions(spsep_tests PRIVATE TESTFILES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test/testfiles")
 endif()

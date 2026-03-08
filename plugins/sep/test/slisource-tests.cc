@@ -16,11 +16,11 @@ constexpr size_t SLI_NOF_LAYERS = 4;
 SliPresentation::Ptr createPresentation1() {
   SliPresentation::Ptr presentation = SliPresentation::create(nullptr);
   EXPECT_NE(presentation, nullptr);
-  if(!presentation)
+  if (!presentation)
     throw std::runtime_error("SliPresentation::create returned null");
   // Assign the callbacks to dummy functions to avoid exceptions
-  presentation->source->enableInteractions = []{};
-  presentation->source->disableInteractions = []{};
+  presentation->source->enableInteractions = [] {};
+  presentation->source->disableInteractions = [] {};
   return presentation;
 }
 

@@ -1,4 +1,4 @@
 #!/bin/bash -eux
 
-find . \( -name cmake-modules -o -name .git -o -name cmake-build-\* -o -name scroom \) -type d -prune \
+find . \( -name cmake-modules -o -name .git -o -name cmake-build-\* -o -name build -o -name scroom \) -type d -prune \
     -o \( -name CMakeLists.txt  -o -name \*.cmake \) -print0 | parallel -0 cmake-format -i \{\}

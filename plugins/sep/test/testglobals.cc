@@ -28,6 +28,5 @@ namespace {
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 const bool environments_registered =
     (::testing::AddGlobalTestEnvironment(new TestFiles),
-     ::testing::AddGlobalTestEnvironment(new GtkMainLoopEnvironment),
-     true);
+     ::testing::AddGlobalTestEnvironment(new GtkMainLoopEnvironment), true);
 } // namespace
