@@ -12,7 +12,8 @@
 #include <scroom/cairo-helpers.hh>
 
 SliPresentation::SliPresentation(ScroomInterface::Ptr scroomInterface_)
-    : scroomInterface(scroomInterface_) {}
+    : context(Scroom::Utils::Context::create()),
+      scroomInterface(scroomInterface_) {}
 
 SliPresentation::Ptr
 SliPresentation::create(ScroomInterface::Ptr scroomInterface_) {
@@ -232,6 +233,10 @@ bool SliPresentation::isPropertyDefined(const std::string &name) {
 }
 
 std::string SliPresentation::getTitle() { return filepath; }
+
+Scroom::Utils::Context::ConstPtr SliPresentation::getContext() const {
+  return context;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // PresentationBase

@@ -21,6 +21,7 @@ public:
 
 public: // For testing
   SepSource::Ptr sep_source;
+  Scroom::Utils::Context::Ptr context;
 
   TiledBitmapInterface::Ptr tbi;
   std::string file_name;
@@ -75,6 +76,7 @@ public:
   bool getProperty(const std::string &name, std::string &value) override;
   bool isPropertyDefined(const std::string &name) override;
   std::string getTitle() override;
+  Scroom::Utils::Context::ConstPtr getContext() const override;
 
   ////////////////////////////////////////////////////////////////////////
   // PresentationBase

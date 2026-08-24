@@ -24,6 +24,7 @@ public:
   /** Contains information on the aspect ratio and is used to scale the
    * presentation accordingly */
   TransformationData::Ptr transformationData;
+  Scroom::Utils::Context::Ptr context;
 
 public: // For testing
   /** The properties defined for this presentation */
@@ -115,6 +116,7 @@ public:
   bool getProperty(const std::string &name, std::string &value) override;
   bool isPropertyDefined(const std::string &name) override;
   std::string getTitle() override;
+  Scroom::Utils::Context::ConstPtr getContext() const override;
 
   ////////////////////////////////////////////////////////////////////////
   // PresentationBase

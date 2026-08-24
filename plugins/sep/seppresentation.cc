@@ -12,7 +12,9 @@
 /////////////////////////////////////////////////////////
 ///// SepPresentation ///////////////////////////////////
 
-SepPresentation::SepPresentation() : sep_source(SepSource::create()) {
+SepPresentation::SepPresentation()
+    : sep_source(SepSource::create()),
+      context(Scroom::Utils::Context::create()) {
   properties[PIPETTE_PROPERTY_NAME] = ""; // add support for pipette
 }
 
@@ -107,6 +109,10 @@ bool SepPresentation::isPropertyDefined(const std::string &name) {
 }
 
 std::string SepPresentation::getTitle() { return file_name; }
+
+Scroom::Utils::Context::ConstPtr SepPresentation::getContext() const {
+  return context;
+}
 
 ////////////////////////////////////////////////////////////////////////
 // PresentationBase
