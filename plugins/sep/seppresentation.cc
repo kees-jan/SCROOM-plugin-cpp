@@ -12,21 +12,21 @@
 /////////////////////////////////////////////////////////
 ///// SepPresentation ///////////////////////////////////
 
-SepPresentation::SepPresentation()
-    : sep_source(SepSource::create()),
-      context(Scroom::Utils::Context::create()) {
+SepPresentation::SepPresentation(Scroom::Logger logger_)
+    : sep_source(SepSource::create(logger_)),
+      context(Scroom::Utils::Context::create()), logger(logger_),
+      colorConfig(ColorConfig::instance(logger_)) {
   properties[PIPETTE_PROPERTY_NAME] = ""; // add support for pipette
 }
 
 SepPresentation::~SepPresentation() {}
 
-SepPresentation::Ptr SepPresentation::create() {
-  return Ptr(new SepPresentation());
+SepPresentation::Ptr SepPresentation::create(Scroom::Logger logger) {
+  return Ptr(new SepPresentation(logger));
 }
 
 bool SepPresentation::load(const std::string &fileName) {
-  ColorConfig::getInstance().loadFile();
-  const SepFile file_content = SepSource::parseSep(fileName);
+  const SepFile file_content = sep_source->parseSep(fileName);
   this->file_name = fileName;
 
   width = file_content.width;
@@ -49,8 +49,7 @@ bool SepPresentation::load(const std::string &fileName) {
   // Set the colors relevant to this tiledbitmap
   std::vector<CustomColor::Ptr> bitmapColors = {};
   for (auto color : sep_source->getChannels()) {
-    bitmapColors.push_back(
-        ColorConfig::getInstance().getColorByNameOrAlias(color));
+    bitmapColors.push_back(colorConfig->getColorByNameOrAlias(color));
   }
   layer_operations->setColors(bitmapColors);
   tbi = createTiledBitmap(width, height, {layer_operations});
@@ -119,8 +118,8 @@ Scroom::Utils::Context::ConstPtr SepPresentation::getContext() const {
 
 void SepPresentation::viewAdded(ViewInterface::WeakPtr interface) {
   if (tbi == nullptr) {
-    printf(
-        "ERROR: SepPresentation::open(): No TiledBitmapInterface available!\n");
+    logger->error(
+        "SepPresentation::open(): No TiledBitmapInterface available!");
     return;
   }
 
@@ -139,8 +138,8 @@ void SepPresentation::viewRemoved(ViewInterface::WeakPtr interface) {
   views.erase(interface);
 
   if (tbi == nullptr) {
-    printf("ERROR: SepPresentation::close(): No TiledBitmapInterface "
-           "available!\n");
+    logger->error(
+        "SepPresentation::close(): No TiledBitmapInterface available!");
     return;
   }
 

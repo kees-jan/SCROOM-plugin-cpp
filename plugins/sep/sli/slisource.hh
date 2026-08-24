@@ -1,5 +1,6 @@
 #pragma once
 
+#include <scroom/logger.hh>
 #include <scroom/scroominterface.hh>
 #include <scroom/threadpool.hh>
 
@@ -66,13 +67,13 @@ public: // For testing
   std::map<SliLayer::Ptr, SepSource::Ptr> sepSources;
 
 public: // For testing
-  /** Constructor */
-  SliSource(boost::function<void()> &triggerRedrawFunc);
+  SliSource(boost::function<void()> &triggerRedrawFunc, Scroom::Logger logger);
 
-  /**
-   * Computes the complete RGB bitmap from the CMYK bitmap and caches the result
-   */
   virtual void computeRgb();
+  virtual void clearBottomSurface();
+
+private:
+  Scroom::Logger logger;
 
   /**
    * Reduces the RGB bitmap and caches the result.
@@ -105,9 +106,7 @@ public: // For testing
    */
   virtual void fillCache();
 
-  /** Clear the last modified area of the bottom surface */
-  virtual void clearBottomSurface();
-
+private:
   /**
    * Draw the CMYK data onto the surface.
    * @param surfacePointer is a pointer to the byte of the surface where the
@@ -188,7 +187,8 @@ public:
    * @param triggerRedrawFunc a callback that allows for triggering a redraw of
    * the presentation
    */
-  static Ptr create(boost::function<void()> &triggerRedrawFunc);
+  static Ptr create(boost::function<void()> &triggerRedrawFunc,
+                    Scroom::Logger logger);
 
   /** Compute the overall width and height of the SLi file (over all layers) */
   virtual void computeHeightWidth();

@@ -7,7 +7,7 @@
 #include "testglobals.hh"
 
 TEST(SepSource_Tests, sepsource_create) { // NOLINT
-  auto source = SepSource::create();
+  auto source = SepSource::create(makeLogger());
   EXPECT_NE(source, nullptr);
 }
 
@@ -17,7 +17,8 @@ TEST(SepSource_Tests, sepsource_parent_dir) { // NOLINT
 }
 
 TEST(SepSource_Tests, sepsource_parse_sep) { // NOLINT
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
+  SepFile file = SepSource::create(makeLogger())
+                     ->parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
   EXPECT_EQ(file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
@@ -31,7 +32,8 @@ TEST(SepSource_Tests, sepsource_parse_sep) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_parse_sep_extra_lines) { // NOLINT
   SepFile file =
-      SepSource::parseSep(TestFiles::getPathToFile("sep_extra_lines.sep"));
+      SepSource::create(makeLogger())
+          ->parseSep(TestFiles::getPathToFile("sep_extra_lines.sep"));
   EXPECT_EQ(file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
@@ -45,7 +47,8 @@ TEST(SepSource_Tests, sepsource_parse_sep_extra_lines) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_parse_sep_empty_line) { // NOLINT
   SepFile file =
-      SepSource::parseSep(TestFiles::getPathToFile("sep_empty_line_2.sep"));
+      SepSource::create(makeLogger())
+          ->parseSep(TestFiles::getPathToFile("sep_empty_line_2.sep"));
   EXPECT_EQ(file.files.size(), 4u);
 
   for (const std::string colour : {"C", "M", "Y", "K"}) {
@@ -60,7 +63,8 @@ TEST(SepSource_Tests, sepsource_parse_sep_empty_line) { // NOLINT
 TEST(SepSource_Tests, sepsource_parse_sep_missing_channel) { // NOLINT
   // Y channel is not defined in this file
   SepFile file =
-      SepSource::parseSep(TestFiles::getPathToFile("sep_missing_channel.sep"));
+      SepSource::create(makeLogger())
+          ->parseSep(TestFiles::getPathToFile("sep_missing_channel.sep"));
   EXPECT_EQ(file.files.size(), 3u);
 
   for (const std::string colour : {"C", "M", "K"}) {
@@ -76,7 +80,8 @@ TEST(SepSource_Tests, sepsource_parse_sep_missing_channel) { // NOLINT
 TEST(SepSource_Tests, sepsource_parse_sep_missing_channel_2) { // NOLINT
   // C channel is not defined in this file + empty line
   SepFile file =
-      SepSource::parseSep(TestFiles::getPathToFile("sep_empty_line_3.sep"));
+      SepSource::create(makeLogger())
+          ->parseSep(TestFiles::getPathToFile("sep_empty_line_3.sep"));
   EXPECT_EQ(file.files.size(), 3u);
 
   for (const std::string colour : {"M", "Y", "K"}) {
@@ -92,7 +97,7 @@ TEST(SepSource_Tests, sepsource_parse_sep_missing_channel_2) { // NOLINT
 TEST(SepSource_Tests, sepsource_get_for_none) { // NOLINT
   uint16_t unit;
   float x_res, y_res;
-  auto source = SepSource::create();
+  auto source = SepSource::create(makeLogger());
 
   source->getForOneChannel(nullptr, unit, x_res, y_res);
 
@@ -104,7 +109,7 @@ TEST(SepSource_Tests, sepsource_get_for_none) { // NOLINT
 TEST(SepSource_Tests, sepsource_get_resolution_null) { // NOLINT
   uint16_t unit;
   float x_res, y_res;
-  auto source = SepSource::create();
+  auto source = SepSource::create(makeLogger());
 
   source->channel_files["C"] = nullptr;
   source->channel_files["M"] = nullptr;
@@ -115,7 +120,7 @@ TEST(SepSource_Tests, sepsource_get_resolution_null) { // NOLINT
 }
 
 TEST(SepSource_Tests, sepsource_get_transformation) { // NOLINT
-  auto source = SepSource::create();
+  auto source = SepSource::create(makeLogger());
 
   source->channel_files["C"] = nullptr;
   source->channel_files["M"] = nullptr;
@@ -129,8 +134,8 @@ TEST(SepSource_Tests, sepsource_get_transformation) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_set_data) { // NOLINT
   // Preparation
-  auto source = SepSource::create();
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
+  auto source = SepSource::create(makeLogger());
+  SepFile file = source->parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
 
   // Tested call
   source->setData(file);
@@ -150,8 +155,8 @@ TEST(SepSource_Tests, sepsource_set_data) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_open_files) { // NOLINT
   // Preparation
-  auto source = SepSource::create();
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
+  auto source = SepSource::create(makeLogger());
+  SepFile file = source->parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
   source->setData(file);
 
   // Tested call
@@ -169,8 +174,8 @@ TEST(SepSource_Tests, sepsource_open_files) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_open_files_twice) { // NOLINT
   // Preparation
-  auto source = SepSource::create();
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
+  auto source = SepSource::create(makeLogger());
+  SepFile file = source->parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
   source->setData(file);
   source->openFiles();
 
@@ -193,8 +198,8 @@ TEST(SepSource_Tests, sepsource_open_files_twice) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_open_files_extra) { // NOLINT
   // Preparation
-  auto source = SepSource::create();
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmykv.sep"));
+  auto source = SepSource::create(makeLogger());
+  SepFile file = source->parseSep(TestFiles::getPathToFile("sep_cmykv.sep"));
   source->setData(file);
   // Set white manually to avoid white choice popup dialog which
   // crashes when executed during tests.
@@ -215,8 +220,8 @@ TEST(SepSource_Tests, sepsource_open_files_extra) { // NOLINT
 
 TEST(SepSource_Tests, sepsource_check_files) { // NOLINT
   // Preparation
-  auto source = SepSource::create();
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmykv.sep"));
+  auto source = SepSource::create(makeLogger());
+  SepFile file = source->parseSep(TestFiles::getPathToFile("sep_cmykv.sep"));
   source->setData(file);
   // Set white manually to avoid white choice popup dialog which
   // crashes when executed during tests.
@@ -240,17 +245,19 @@ TEST(SepSource_Tests, sepsource_tiff_wrapper_2) { // NOLINT
 }
 
 TEST(SepSource_Tests, sepsource_fill_sli_empty) { // NOLINT
-  SliLayer::Ptr sli = SliLayer::create("", "name", 0, 0);
+  auto const logger = makeLogger();
+  SliLayer::Ptr sli = SliLayer::create("", "name", 0, 0, logger);
   sli->height = 42;
-  SepSource::Ptr sepSource = SepSource::create();
+  SepSource::Ptr sepSource = SepSource::create(logger);
   sepSource->fillSliLayerMeta(sli);
   EXPECT_EQ(sli->height, 42);
 }
 
 TEST(SepSource_Tests, sepsource_fill_sli_1) { // NOLINT
-  SliLayer::Ptr sli =
-      SliLayer::create(TestFiles::getPathToFile("sep_cmyk.sep"), "name", 0, 0);
-  SepSource::Ptr sepSource = SepSource::create();
+  auto const logger = makeLogger();
+  SliLayer::Ptr sli = SliLayer::create(TestFiles::getPathToFile("sep_cmyk.sep"),
+                                       "name", 0, 0, logger);
+  SepSource::Ptr sepSource = SepSource::create(logger);
   sepSource->fillSliLayerMeta(sli);
   sepSource->fillSliLayerBitmap(sli);
   EXPECT_EQ(sli->width, 600);
@@ -279,8 +286,8 @@ TEST(SepSource_Tests, sepsource_closeIfNeeded_2) { // NOLINT
 TEST(SepSource_Tests, sepsource_fill_no_tiles) { // NOLINT
   // Preparation
   std::vector<Tile::Ptr> tiles;
-  auto source = SepSource::create();
-  SepFile file = SepSource::parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
+  auto source = SepSource::create(makeLogger());
+  SepFile file = source->parseSep(TestFiles::getPathToFile("sep_cmyk.sep"));
   source->setData(file);
   source->openFiles();
 

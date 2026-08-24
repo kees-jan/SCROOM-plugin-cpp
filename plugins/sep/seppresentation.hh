@@ -4,8 +4,10 @@
 #include <string>
 
 #include <scroom/layeroperations.hh>
+#include <scroom/logger.hh>
 #include <scroom/presentationinterface.hh>
 
+#include "colorconfig/CustomColorConfig.hh"
 #include "colorconfig/CustomColorOperations.hh"
 #include "sepsource.hh"
 
@@ -37,20 +39,15 @@ public: // For testing
   PipetteCommonOperationsCustomColor::Ptr layer_operations;
 
 private:
-  /**
-   * Constructor for a standalone SepPresentation to be passed to
-   * the Scroom core.
-   */
-  SepPresentation();
+  Scroom::Logger logger;
+  ColorConfig::Ptr colorConfig;
+
+  explicit SepPresentation(Scroom::Logger logger);
 
 public:
   virtual ~SepPresentation();
 
-  /**
-   * Constructor to be called for a standalone SepPresentation to
-   * be passed to the Scroom core
-   */
-  static Ptr create();
+  static Ptr create(Scroom::Logger logger);
 
   /**
    * Load the SEP file whose filename is passed as argument.

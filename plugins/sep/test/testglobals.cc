@@ -4,6 +4,10 @@
 
 #include <scroom/gtk-test-helpers.hh>
 
+Scroom::Logger makeLogger() {
+  return Scroom::Logger(std::make_shared<Scroom::LoggerContainer>());
+}
+
 namespace {
 class GtkMainLoopEnvironment : public ::testing::Environment {
 private:

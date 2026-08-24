@@ -240,11 +240,11 @@ void SliControlPanel::create_view_and_model() {
 
 SliControlPanel::SliControlPanel(
     ViewInterface::WeakPtr viewWeak_,
-    SliPresentationInterface::WeakPtr presentation_)
-    : presentation(presentation_), viewWeak(viewWeak_) {
+    SliPresentationInterface::WeakPtr presentation_, Scroom::Logger logger_)
+    : presentation(presentation_), viewWeak(viewWeak_), logger(logger_) {
   require(Scroom::GtkHelpers::on_ui_thread());
 
-  printf("Multilayer control panel has been created\n");
+  logger->debug("Multilayer control panel has been created");
   SliPresentationInterface::Ptr presPtr = presentation.lock();
   std::vector<SliLayer::Ptr> layers = presPtr->getLayers();
   n_layers = layers.size();
@@ -355,14 +355,15 @@ void SliControlPanel::reAttach(ViewInterface::WeakPtr viewWeak_) {
 }
 
 SliControlPanel::~SliControlPanel() {
-  printf("Multilayer control panel has been destroyed\n");
+  logger->debug("Multilayer control panel has been destroyed");
 }
 
 SliControlPanel::Ptr
 SliControlPanel::create(ViewInterface::WeakPtr viewWeak_,
-                        SliPresentationInterface::WeakPtr presentation_) {
-  SliControlPanel::Ptr result =
-      SliControlPanel::Ptr(new SliControlPanel(viewWeak_, presentation_));
+                        SliPresentationInterface::WeakPtr presentation_,
+                        Scroom::Logger logger) {
+  SliControlPanel::Ptr result = SliControlPanel::Ptr(
+      new SliControlPanel(viewWeak_, presentation_, logger));
 
   return result;
 }

@@ -6,7 +6,10 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/shared_ptr.hpp>
-#include <iostream>
+
+#include <memory>
+
+#include <scroom/logger.hh>
 
 #include "CustomColor.hh"
 #include <scroom/plugininformationinterface.hh>
@@ -15,22 +18,22 @@
 
 namespace pt = boost::property_tree;
 class ColorConfig {
+public:
+  using Ptr = std::shared_ptr<ColorConfig>;
 
 public: // For testing
-  ColorConfig();
+  explicit ColorConfig(Scroom::Logger logger,
+                       std::string file = "colours.json");
 
 private:
+  Scroom::Logger logger;
   std::vector<CustomColor::Ptr> colors;
 
 public:
-  static ColorConfig &getInstance() {
-    static ColorConfig INSTANCE;
-    return INSTANCE;
-  }
+  static Ptr instance(Scroom::Logger logger);
 
   std::vector<CustomColor::Ptr> getDefinedColors();
   CustomColor::Ptr getColorByNameOrAlias(std::string name);
-  void loadFile(std::string file = "colours.json");
 
   void addNonExistentDefaultColors();
 

@@ -14,10 +14,13 @@
 
 #include "sep-helpers.hh"
 
-SepSource::SepSource() {}
+SepSource::SepSource(Scroom::Logger logger_)
+    : logger(logger_), colorConfig(ColorConfig::instance(logger_)) {}
 SepSource::~SepSource() {}
 
-SepSource::Ptr SepSource::create() { return Ptr(new SepSource()); }
+SepSource::Ptr SepSource::create(Scroom::Logger logger) {
+  return Ptr(new SepSource(logger));
+}
 
 boost::filesystem::path SepSource::findParentDir(const std::string &file_path) {
   return boost::filesystem::path(file_path).parent_path();
@@ -30,32 +33,32 @@ boost::filesystem::path SepSource::findParentDir(const std::string &file_path) {
  * names is empty or one of the channel lines does not follow the specification,
  * a warning dialog is shown.
  */
-SepFile SepSource::parseSep(const std::string &file_name) {
-  std::ifstream file(file_name);
+SepFile SepSource::parseSep(const std::string &file_name_) {
+  std::ifstream file(file_name_);
   std::string line;
 
-  SepFile sep_file;
+  SepFile sep_file_;
   std::string warnings = "";
-  const auto parent_dir = SepSource::findParentDir(file_name);
+  const auto parent_dir = SepSource::findParentDir(file_name_);
 
   // Read the first two lines of the file seperately, since they follow
   // a slightly different format (i.e. don't have a colon) and are to be
   // interpreted as integers defining the width and height of the image.
   try {
     std::getline(file, line);
-    sep_file.width = std::stoul(line);
+    sep_file_.width = std::stoul(line);
     std::getline(file, line);
-    sep_file.height = std::stoul(line);
+    sep_file_.height = std::stoul(line);
   } catch (const std::exception &e) {
-    sep_file.width = 0;
-    sep_file.height = 0;
+    sep_file_.width = 0;
+    sep_file_.height = 0;
     warnings += "WARNING: Width or height have not been provided correctly!\n";
   }
 
   // Initialize the files to an empty hashmap
-  sep_file.files = {};
+  sep_file_.files = {};
   // Initialize the varnish file to an empty path
-  sep_file.varnish_file = "";
+  sep_file_.varnish_file = "";
 
   // Read lines of the file
   while (std::getline(file, line)) {
@@ -76,8 +79,7 @@ SepFile SepSource::parseSep(const std::string &file_name) {
     }
 
     // Load the color corresponding to this name
-    auto correctColor =
-        ColorConfig::getInstance().getColorByNameOrAlias(result[0]);
+    auto correctColor = colorConfig->getColorByNameOrAlias(result[0]);
 
     if (correctColor == nullptr &&
         boost::algorithm::to_upper_copy(result[0]) != "V") {
@@ -87,10 +89,10 @@ SepFile SepSource::parseSep(const std::string &file_name) {
     } else if (correctColor ==
                nullptr) { // Unknown color is the varnish channel
 
-      sep_file.varnish_file = parent_dir / result[1];
+      sep_file_.varnish_file = parent_dir / result[1];
     } else {
       // store the full file path to each file
-      sep_file.files[result[0]] = parent_dir / result[1];
+      sep_file_.files[result[0]] = parent_dir / result[1];
     }
   }
 
@@ -104,7 +106,7 @@ SepFile SepSource::parseSep(const std::string &file_name) {
     ShowWarning(warnings);
   }
 
-  return sep_file;
+  return sep_file_;
 }
 
 void SepSource::getForOneChannel(struct tiff *channel, uint16_t &unit,
@@ -197,8 +199,7 @@ void SepSource::fillSliLayerMeta(SliLayer::Ptr sli) {
 
   sli->channels = {}; // Copy the channels to the SLI layer;
   for (std::string colorName : channels) {
-    sli->channels.push_back(
-        ColorConfig::getInstance().getColorByNameOrAlias(colorName));
+    sli->channels.push_back(colorConfig->getColorByNameOrAlias(colorName));
   }
 }
 
@@ -234,9 +235,8 @@ void SepSource::setName(const std::string &file_name_) {
 void SepSource::openFiles() {
   for (const auto &c : channels) {
     if (channel_files[c] != nullptr) {
-      printf("WARNING: %s file has already been initialized. Cannot open it "
-             "again.\n",
-             c.c_str());
+      logger->warn(
+          "{} file has already been initialized. Cannot open it again.", c);
       return;
     }
   }
@@ -255,8 +255,8 @@ void SepSource::openFiles() {
 
   // open varnish channel
   if (sep_file.varnish_file.string() != "") {
-    SliLayer::Ptr varnishLayer =
-        SliLayer::create(sep_file.varnish_file.string(), "Varnish", 0, 0);
+    SliLayer::Ptr varnishLayer = SliLayer::create(
+        sep_file.varnish_file.string(), "Varnish", 0, 0, logger);
     if (varnishLayer->fillMetaFromTiff(8, 1)) {
       varnishLayer->fillBitmapFromTiff();
       varnish = Varnish::create(varnishLayer);
@@ -266,8 +266,8 @@ void SepSource::openFiles() {
   }
 
   if (show_warning) {
-    printf("PANIC: One of the provided files is not valid, or could not be "
-           "opened!\n");
+    logger->error(
+        "One of the provided files is not valid, or could not be opened!");
     ShowWarning("PANIC: One of the provided files is not valid, or could not "
                 "be opened!");
   }

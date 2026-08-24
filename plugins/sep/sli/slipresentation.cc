@@ -11,18 +11,22 @@
 
 #include <scroom/cairo-helpers.hh>
 
-SliPresentation::SliPresentation(ScroomInterface::Ptr scroomInterface_)
+SliPresentation::SliPresentation(ScroomInterface::Ptr scroomInterface_,
+                                 Scroom::Logger logger_)
     : context(Scroom::Utils::Context::create()),
-      scroomInterface(scroomInterface_) {}
+      scroomInterface(scroomInterface_), logger(logger_),
+      colorConfig(ColorConfig::instance(logger_)) {}
 
 SliPresentation::Ptr
-SliPresentation::create(ScroomInterface::Ptr scroomInterface_) {
-  SliPresentation::Ptr result = Ptr(new SliPresentation(scroomInterface_));
+SliPresentation::create(ScroomInterface::Ptr scroomInterface_,
+                        Scroom::Logger logger) {
+  SliPresentation::Ptr result =
+      Ptr(new SliPresentation(scroomInterface_, logger));
 
   // Can't do this in the constructor as it requires an existing shared pointer
   result->triggerRedrawFunc =
       boost::bind(&SliPresentation::triggerRedraw, result);
-  result->source = SliSource::create(result->triggerRedrawFunc);
+  result->source = SliSource::create(result->triggerRedrawFunc, logger);
 
   return result;
 }
@@ -30,7 +34,6 @@ SliPresentation::create(ScroomInterface::Ptr scroomInterface_) {
 SliPresentation::~SliPresentation() {}
 
 bool SliPresentation::load(const std::string &fileName) {
-  ColorConfig::getInstance().loadFile();
   filepath = fileName;
   if (!parseSli(fileName)) {
     return false;
@@ -56,7 +59,7 @@ bool SliPresentation::load(const std::string &fileName) {
           "but layer {} has xAspect={:.3f} and yAspect={:.3f}",
           xAspect, yAspect, layer->name, layer->xAspect, layer->yAspect);
 
-      printf("%s\n", warning.c_str());
+      logger->warn("{}", warning);
       ShowWarning(warning);
     }
   }
@@ -78,18 +81,18 @@ bool SliPresentation::parseSli(const std::string &sliFileName) {
     std::string firstToken = *i++;
     if (firstToken == "Xresolution:" && i != j) {
       Xresolution = std::stof(*i++);
-      printf("xresolution: %f\n", Xresolution);
+      logger->debug("xresolution: {}", Xresolution);
     } else if (firstToken == "Yresolution:" && i != j) {
       Yresolution = std::stof(*i++);
-      printf("yresolution: %f\n", Yresolution);
+      logger->debug("yresolution: {}", Yresolution);
     } else if (firstToken == "varnish_file:") {
       std::string varnishFile = std::string(*i++);
-      printf("varnish_file: %s\n", varnishFile.c_str());
+      logger->debug("varnish_file: {}", varnishFile);
       fs::path imagePath = fs::path(dirPath) /= varnishFile;
       if (fs::exists(imagePath)) {
-        printf("varnish file exists.\n");
+        logger->debug("varnish file exists.");
         SliLayer::Ptr varnishLayer =
-            SliLayer::create(imagePath.string(), varnishFile, 0, 0);
+            SliLayer::create(imagePath.string(), varnishFile, 0, 0, logger);
         if (varnishLayer->fillMetaFromTiff(8, 1)) {
           varnishLayer->fillBitmapFromTiff();
           varnish = Varnish::create(varnishLayer);
@@ -97,14 +100,14 @@ bool SliPresentation::parseSli(const std::string &sliFileName) {
         } else {
           std::string error =
               "Error: Varnish file could not be loaded successfully";
-          printf("%s\n", error.c_str());
+          logger->error("{}", error);
           Show(error, GTK_MESSAGE_ERROR);
           return false;
         }
       } else {
         auto error = fmt::format("Error: Varnish file not found: {}",
                                  imagePath.string());
-        printf("%s\n", error.c_str());
+        logger->error("{}", error);
         Show(error, GTK_MESSAGE_ERROR);
         return false;
       }
@@ -128,7 +131,7 @@ bool SliPresentation::parseSli(const std::string &sliFileName) {
     } else {
       auto error = fmt::format(
           "Error: Token '{}' in SLI file is not an existing file", firstToken);
-      printf("%s\n", error.c_str());
+      logger->error("{}", error);
       Show(error, GTK_MESSAGE_ERROR);
       return false;
     }
@@ -138,7 +141,7 @@ bool SliPresentation::parseSli(const std::string &sliFileName) {
     return true;
   }
   std::string error = "Error: SLI file does not define all required parameters";
-  printf("%s\n", error.c_str());
+  logger->error("{}", error);
   Show(error, GTK_MESSAGE_ERROR);
   return false;
 }
@@ -245,8 +248,8 @@ void SliPresentation::viewAdded(ViewInterface::WeakPtr vi) {
 
   // We want to have only one control panel in total
   if (views.empty()) {
-    controlPanel =
-        SliControlPanel::create(vi, shared_from_this<SliPresentation>());
+    controlPanel = SliControlPanel::create(
+        vi, shared_from_this<SliPresentation>(), logger);
     controlPanel->disableInteractions();
 
     // Provide the source with the means to enable and disable the widgets in

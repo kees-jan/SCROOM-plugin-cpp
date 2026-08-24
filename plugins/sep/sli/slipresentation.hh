@@ -2,11 +2,13 @@
 
 #include <fstream>
 
+#include <scroom/logger.hh>
 #include <scroom/pipetteviewinterface.hh>
 #include <scroom/presentationinterface.hh>
 #include <scroom/scroominterface.hh>
 #include <scroom/transformpresentation.hh>
 
+#include "../colorconfig/CustomColorConfig.hh"
 #include "../varnish/varnish.hh"
 #include "sli-helpers.hh"
 #include "slicontrolpanel.hh"
@@ -59,15 +61,18 @@ public: // For testing
   std::string filepath;
 
 private:
-  /** Constructor */
-  SliPresentation(ScroomInterface::Ptr scroomInterface);
+  Scroom::Logger logger;
+  ColorConfig::Ptr colorConfig;
+
+  explicit SliPresentation(ScroomInterface::Ptr scroomInterface,
+                           Scroom::Logger logger);
 
 public:
   /** Destructor */
   virtual ~SliPresentation();
 
-  /** Constructor */
-  static Ptr create(ScroomInterface::Ptr scroomInterface);
+  static Ptr create(ScroomInterface::Ptr scroomInterface,
+                    Scroom::Logger logger);
 
   /**
    * Load the SLI file and instruct the Scroom core to display it

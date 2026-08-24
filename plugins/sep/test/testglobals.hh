@@ -5,6 +5,10 @@
 #include <filesystem>
 #include <string>
 
+#include <scroom/logger.hh>
+
+Scroom::Logger makeLogger();
+
 class TestFiles : public ::testing::Environment {
 private:
   static std::filesystem::path dir;

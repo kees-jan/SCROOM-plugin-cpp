@@ -14,7 +14,8 @@ constexpr size_t SLI_NOF_LAYERS = 4;
 // Helper functions
 
 SliPresentation::Ptr createPresentation1() {
-  SliPresentation::Ptr presentation = SliPresentation::create(nullptr);
+  SliPresentation::Ptr presentation =
+      SliPresentation::create(nullptr, makeLogger());
   EXPECT_NE(presentation, nullptr);
   if (!presentation)
     throw std::runtime_error("SliPresentation::create returned null");

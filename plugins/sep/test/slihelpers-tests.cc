@@ -4,6 +4,7 @@
 
 #include "../sli/sli-helpers.hh"
 #include "../sli/slilayer.hh"
+#include "testglobals.hh"
 #include <scroom/scroominterface.hh>
 
 TEST(Sli_Tests, slihelpers_clearsurface) { // NOLINT
@@ -122,8 +123,9 @@ TEST(Sli_Tests, slihelpers_spanned_rectangle) { // NOLINT
   unsigned int n_layers = 2;
   boost::dynamic_bitset<> bitmap{n_layers};
   std::vector<SliLayer::Ptr> layers;
+  auto const logger = makeLogger();
 
-  layers.push_back(SliLayer::create("", "Layer", 0, 0));
+  layers.push_back(SliLayer::create("", "Layer", 0, 0, logger));
   layers[0]->xoffset = 0;
   layers[0]->yoffset = 0;
   layers[0]->width = 100;
@@ -133,7 +135,7 @@ TEST(Sli_Tests, slihelpers_spanned_rectangle) { // NOLINT
   auto spanRect1 = spannedRectangle(bitmap, layers, false);
   EXPECT_EQ(getArea(spanRect1), 100 * 100);
 
-  layers.push_back(SliLayer::create("", "Layer", 0, 0));
+  layers.push_back(SliLayer::create("", "Layer", 0, 0, logger));
   layers[1]->xoffset = 10;
   layers[1]->yoffset = 10;
   layers[1]->width = 100;

@@ -10,8 +10,8 @@
 
 SliLayer::Ptr SliLayer::create(const std::string &filepath,
                                const std::string &name, int xoffset,
-                               int yoffset) {
-  SliLayer::Ptr layer(new SliLayer());
+                               int yoffset, Scroom::Logger logger) {
+  SliLayer::Ptr layer(new SliLayer(logger));
   layer->filepath = filepath;
   layer->name = name;
   layer->xoffset = xoffset;
@@ -19,7 +19,9 @@ SliLayer::Ptr SliLayer::create(const std::string &filepath,
   return layer;
 }
 
-SliLayer::SliLayer() : height(0), width(0) {}
+SliLayer::SliLayer(Scroom::Logger logger_)
+    : height(0), width(0), logger(logger_),
+      colorConfig(ColorConfig::instance(logger_)) {}
 
 Scroom::Utils::Rectangle<int> SliLayer::toRectangle() {
   Scroom::Utils::Rectangle<int> rect{xoffset, yoffset, width, height};
@@ -33,7 +35,7 @@ bool SliLayer::fillMetaFromTiff(unsigned int allowedBps,
     TIFF *tif = TIFFOpen(filepath.c_str(), "r");
     if (!tif) {
       auto error = fmt::format("Error: Failed to open file {}", filepath);
-      printf("%s\n", error.c_str());
+      logger->error("{}", error);
       Show(error, GTK_MESSAGE_ERROR);
       return false;
     }
@@ -44,7 +46,7 @@ bool SliLayer::fillMetaFromTiff(unsigned int allowedBps,
       auto error =
           fmt::format("Error: Samples per pixel of file {} is not {}, but {}",
                       filepath, allowedSpp, spp);
-      printf("%s\n", error.c_str());
+      logger->error("{}", error);
       Show(error, GTK_MESSAGE_ERROR);
       return false;
     }
@@ -54,7 +56,7 @@ bool SliLayer::fillMetaFromTiff(unsigned int allowedBps,
       auto error =
           fmt::format("Error: Bits per sample of file {} is not {}, but {}",
                       filepath, allowedBps, bps);
-      printf("%s\n", error.c_str());
+      logger->error("{}", error);
       Show(error, GTK_MESSAGE_ERROR);
       return false;
     }
@@ -79,19 +81,19 @@ bool SliLayer::fillMetaFromTiff(unsigned int allowedBps,
 
     TIFFGetFieldChecked(tif, TIFFTAG_IMAGEWIDTH, &width);
     TIFFGetFieldChecked(tif, TIFFTAG_IMAGELENGTH, &height);
-    printf("This bitmap has size %d*%d, aspect ratio %.1f*%.1f\n", width,
-           height, xAspect, yAspect);
+    logger->debug("This bitmap has size {}*{}, aspect ratio {:.1f}*{:.1f}",
+                  width, height, xAspect, yAspect);
 
     TIFFClose(tif);
-    channels = {ColorConfig::getInstance().getColorByNameOrAlias("c"),
-                ColorConfig::getInstance().getColorByNameOrAlias("m"),
-                ColorConfig::getInstance().getColorByNameOrAlias("y"),
-                ColorConfig::getInstance().getColorByNameOrAlias("k")};
+    channels = {colorConfig->getColorByNameOrAlias("c"),
+                colorConfig->getColorByNameOrAlias("m"),
+                colorConfig->getColorByNameOrAlias("y"),
+                colorConfig->getColorByNameOrAlias("k")};
     return true;
 
   } catch (const std::exception &ex) {
     auto error = fmt::format("Error: {}", ex.what());
-    printf("%s\n", error.c_str());
+    logger->error("{}", error);
     Show(error, GTK_MESSAGE_ERROR);
     return false;
   }
@@ -102,7 +104,7 @@ void SliLayer::fillBitmapFromTiff() {
     TIFF *tif = TIFFOpen(filepath.c_str(), "r");
     if (!tif) {
       auto error = fmt::format("Error: Failed to open file {}", filepath);
-      printf("%s\n", error.c_str());
+      logger->error("{}", error);
       Show(error, GTK_MESSAGE_ERROR);
       return;
     }
@@ -124,7 +126,7 @@ void SliLayer::fillBitmapFromTiff() {
 
   } catch (const std::exception &ex) {
     auto error = fmt::format("Error: {}", ex.what());
-    printf("%s\n", error.c_str());
+    logger->error("{}", error);
     Show(error, GTK_MESSAGE_ERROR);
   }
 }

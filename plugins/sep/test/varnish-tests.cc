@@ -55,8 +55,9 @@ public:
 // Tests for varnish loading
 
 TEST(varnish_tests, varnish_load_valid_tiff) { // NOLINT
-  SliLayer::Ptr test_varnishLayer = SliLayer::create(
-      TestFiles::getPathToFile("v_valid.tif"), "SomeCoolTitle", 0, 0);
+  SliLayer::Ptr test_varnishLayer =
+      SliLayer::create(TestFiles::getPathToFile("v_valid.tif"), "SomeCoolTitle",
+                       0, 0, makeLogger());
   test_varnishLayer->fillMetaFromTiff(8, 1);
   test_varnishLayer->fillBitmapFromTiff();
   Varnish::Ptr test_varnish = Varnish::create(test_varnishLayer);
@@ -78,7 +79,7 @@ TEST(varnish_tests, varnish_load_valid_tiff) { // NOLINT
 TEST(varnish_tests, varnish_load_valid_tiff_centimeter) { // NOLINT
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_valid_centimeter.tif"),
-                       "SomeCoolTitle", 0, 0);
+                       "SomeCoolTitle", 0, 0, makeLogger());
   test_varnishLayer->fillMetaFromTiff(8, 1);
   test_varnishLayer->fillBitmapFromTiff();
   Varnish::Ptr test_varnish = Varnish::create(test_varnishLayer);
@@ -102,7 +103,7 @@ TEST(varnish_tests, varnish_load_valid_tiff_no_spp_tag) { // NOLINT
   // to 1 spp
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_valid_no_spp_tag.tif"),
-                       "SomeCoolTitle", 0, 0);
+                       "SomeCoolTitle", 0, 0, makeLogger());
   test_varnishLayer->fillMetaFromTiff(8, 1);
   test_varnishLayer->fillBitmapFromTiff();
   Varnish::Ptr test_varnish = Varnish::create(test_varnishLayer);
@@ -122,8 +123,9 @@ TEST(varnish_tests, varnish_load_valid_tiff_no_spp_tag) { // NOLINT
 }
 
 TEST(varnish_tests, varnish_load_invalid_tiff) { // NOLINT
-  SliLayer::Ptr test_varnishLayer = SliLayer::create(
-      TestFiles::getPathToFile("v_invalidrgb.tif"), "Another Title", 0, 0);
+  SliLayer::Ptr test_varnishLayer =
+      SliLayer::create(TestFiles::getPathToFile("v_invalidrgb.tif"),
+                       "Another Title", 0, 0, makeLogger());
   // Tif handling should fail here
   EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
@@ -143,7 +145,7 @@ TEST(varnish_tests, varnish_load_zero_res_tiff) { // NOLINT
   // This test file is missing a width tag
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_invalid_no_width.tif"),
-                       "Another Title", 0, 0);
+                       "Another Title", 0, 0, makeLogger());
   // Tif handling should fail here
   EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
@@ -161,8 +163,9 @@ TEST(varnish_tests, varnish_load_zero_res_tiff) { // NOLINT
 
 TEST(varnish_tests, varnish_load_corrupted_tiff) { // NOLINT
   // This test files magic number and file data was randomly edited.
-  SliLayer::Ptr test_varnishLayer = SliLayer::create(
-      TestFiles::getPathToFile("v_corrupted.tif"), "Another Title", 0, 0);
+  SliLayer::Ptr test_varnishLayer =
+      SliLayer::create(TestFiles::getPathToFile("v_corrupted.tif"),
+                       "Another Title", 0, 0, makeLogger());
   // Tif handling should fail here
   EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
@@ -181,7 +184,7 @@ TEST(varnish_tests, varnish_load_corrupted_tiff) { // NOLINT
 TEST(varnish_tests, varnish_load_nonexistent_tiff) { // NOLINT
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_nonexistent.tif"),
-                       "This file doesn't exist", 0, 0);
+                       "This file doesn't exist", 0, 0, makeLogger());
   // Tif handling should fail here
   EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
@@ -199,8 +202,9 @@ TEST(varnish_tests, varnish_load_nonexistent_tiff) { // NOLINT
 
 TEST(varnish_tests, varnish_load_1bps_tiff) { // NOLINT
   // This test file has 1 bps, which is not supported
-  SliLayer::Ptr test_varnishLayer = SliLayer::create(
-      TestFiles::getPathToFile("v_invalid1bps.tif"), "TitleGoesHere", 0, 0);
+  SliLayer::Ptr test_varnishLayer =
+      SliLayer::create(TestFiles::getPathToFile("v_invalid1bps.tif"),
+                       "TitleGoesHere", 0, 0, makeLogger());
   // Tif handling should fail here
   EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?
@@ -221,7 +225,7 @@ TEST(varnish_tests, varnish_load_invalid_no_bps_tiff) { // NOLINT
   // not supported for varnish
   SliLayer::Ptr test_varnishLayer =
       SliLayer::create(TestFiles::getPathToFile("v_invalid_no_bps_tag.tif"),
-                       "TitleGoesHere", 0, 0);
+                       "TitleGoesHere", 0, 0, makeLogger());
   // Tif handling should fail here
   EXPECT_FALSE(test_varnishLayer->fillMetaFromTiff(8, 1));
   // Properties set correctly?

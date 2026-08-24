@@ -6,15 +6,14 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <iostream>
 #include <list>
+#include <mutex>
 #include <unordered_set>
 
 namespace pt = boost::property_tree;
 
-ColorConfig::ColorConfig() {}
-
-void ColorConfig::loadFile(std::string file) {
+ColorConfig::ColorConfig(Scroom::Logger logger_, std::string file)
+    : logger(logger_) {
   colors.clear();
   pt::ptree root;
   boost::filesystem::path full_path(boost::filesystem::current_path());
@@ -25,9 +24,8 @@ void ColorConfig::loadFile(std::string file) {
   }
   if (!boost::filesystem::exists(
           full_path)) { // File does not exist on file system
-    std::cout << "WARNING: Colours file does not exist at path: " +
-                     full_path.string() + "\n";
-    std::cout << "Loading default CMYK \n";
+    logger->warn("Colours file does not exist at path: {}", full_path.string());
+    logger->info("Loading default CMYK");
     addNonExistentDefaultColors();
     return;
   }
@@ -36,9 +34,10 @@ void ColorConfig::loadFile(std::string file) {
     pt::read_json(full_path.string(), root);
   } catch (const std::exception &e) {
     // Loading didnt work
-    std::cout << "WARNING: Loading colours file failed. file at: " +
-                     full_path.string() + " is most likely ill formed.\n";
-    std::cout << "Loading default CMYK \n";
+    logger->warn(
+        "Loading colours file failed. file at: {} is most likely ill formed.",
+        full_path.string());
+    logger->info("Loading default CMYK");
     addNonExistentDefaultColors();
     return;
   }
@@ -46,12 +45,24 @@ void ColorConfig::loadFile(std::string file) {
   std::unordered_set<std::string> seenNamesAndAliases = {};
   seenNamesAndAliases.insert("V"); // Insert placeholder for varnish
 
-  std::cout << "Loading colour config file. NOTE: v is reserved for varnish, "
-               "so should not be defined as name or alias!!\n";
+  logger->info("Loading colour config file. NOTE: v is reserved for varnish, "
+               "so should not be defined as name or alias!!");
   for (pt::ptree::value_type &v : root.get_child("colours")) {
     parseColor(v, seenNamesAndAliases);
   }
   addNonExistentDefaultColors();
+}
+
+ColorConfig::Ptr ColorConfig::instance(Scroom::Logger logger) {
+  static std::mutex mut;
+  static std::weak_ptr<ColorConfig> inst;
+  std::lock_guard const lock(mut);
+  Ptr result = inst.lock();
+  if (!result) {
+    result = Ptr(new ColorConfig(logger));
+    inst = result;
+  }
+  return result;
 }
 
 void ColorConfig::addNonExistentDefaultColors() {
@@ -117,7 +128,7 @@ void ColorConfig::parseColor(
   // Check if this name has not yet been seen before
   if (seenNamesAndAliases.find(name) != seenNamesAndAliases.end()) {
     // It exists
-    std::cout << "ERROR: Duplicate name or alias: " << name << "!\n";
+    logger->error("Duplicate name or alias: {}!", name);
     // Color already exists, so it should not be added to the colors
     return;
   }
@@ -150,10 +161,10 @@ void ColorConfig::parseColor(
       // Test if an alias already exists in a different colour
       if (seenNamesAndAliases.find(alias) != seenNamesAndAliases.end()) {
         // It exists
-        std::cout << "ERROR: Duplicate alias: " + alias + "!\n";
+        logger->error("Duplicate alias: {}!", alias);
       } else {
         // It is a new alias
-        std::cout << "New alias: " + alias + "\n";
+        logger->debug("New alias: {}", alias);
         seenNamesAndAliases.insert(alias);
       }
 
@@ -164,7 +175,7 @@ void ColorConfig::parseColor(
     newColour->aliases = validAliases;
   } catch (const std::exception &e) {
     // When no aliasses exist, ignore exception
-    std::cout << "No aliasses found.\n";
+    logger->debug("No aliasses found.");
   }
 
   colors.push_back(newColour);

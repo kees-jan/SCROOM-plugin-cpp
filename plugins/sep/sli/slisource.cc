@@ -7,15 +7,17 @@
 
 #include <fmt/format.h>
 
-SliSource::SliSource(boost::function<void()> &triggerRedrawFunc)
-    : triggerRedraw(triggerRedrawFunc) {
+SliSource::SliSource(boost::function<void()> &triggerRedrawFunc,
+                     Scroom::Logger logger_)
+    : triggerRedraw(triggerRedrawFunc), logger(logger_) {
   threadQueue = ThreadPool::Queue::create();
 }
 
 SliSource::~SliSource() {}
 
-SliSource::Ptr SliSource::create(boost::function<void()> &triggerRedrawFunc) {
-  return Ptr(new SliSource(triggerRedrawFunc));
+SliSource::Ptr SliSource::create(boost::function<void()> &triggerRedrawFunc,
+                                 Scroom::Logger logger) {
+  return Ptr(new SliSource(triggerRedrawFunc, logger));
 }
 
 void SliSource::computeHeightWidth() {
@@ -38,10 +40,11 @@ bool SliSource::addLayer(std::string imagePath, std::string filename,
   auto extension = filename.substr(filename.find_last_of("."));
   boost::to_lower(extension);
 
-  SliLayer::Ptr layer = SliLayer::create(imagePath, filename, xOffset, yOffset);
+  SliLayer::Ptr layer =
+      SliLayer::create(imagePath, filename, xOffset, yOffset, logger);
 
   if (extension == ".sep") {
-    sepSources[layer] = SepSource::create();
+    sepSources[layer] = SepSource::create(logger);
     sepSources[layer]->fillSliLayerMeta(layer);
   } else if (extension == ".tif" || extension == ".tiff") {
     if (!layer->fillMetaFromTiff(8, 4)) {
@@ -50,7 +53,7 @@ bool SliSource::addLayer(std::string imagePath, std::string filename,
   } else {
     auto error =
         fmt::format("Error: File extension of {} is not supported", filename);
-    printf("%s\n", error.c_str());
+    logger->error("{}", error);
     Show(error, GTK_MESSAGE_ERROR);
     return false;
   }

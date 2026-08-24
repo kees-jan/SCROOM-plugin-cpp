@@ -4,9 +4,11 @@
 #include <tiffio.h>
 
 #include <boost/filesystem.hpp>
+#include <scroom/logger.hh>
 #include <scroom/tiledbitmapinterface.hh>
 #include <scroom/transformpresentation.hh>
 
+#include "colorconfig/CustomColorConfig.hh"
 #include "sli/slilayer.hh"
 #include "varnish/varnish.hh"
 
@@ -43,7 +45,11 @@ public: // For testing
   std::string file_name;
 
   /** Constructor */
-  SepSource();
+  explicit SepSource(Scroom::Logger logger);
+
+private:
+  Scroom::Logger logger;
+  ColorConfig::Ptr colorConfig;
 
 public:
   /** Destructor */
@@ -55,7 +61,7 @@ public:
   /**
    * Create a pointer to SepSource using constructor and return it.
    */
-  static Ptr create();
+  static Ptr create(Scroom::Logger logger);
 
   /**
    * Get the number of samples per pixel in this sep source
@@ -93,9 +99,9 @@ public:
 
   /**
    * Parse the file into a struct.
-   * @param file_name - path to file.
+   * @param file_name_ - path to file.
    */
-  static SepFile parseSep(const std::string &file_name);
+  SepFile parseSep(const std::string &file_name_);
 
   /**
    * Setter for SepSource::sep_file.

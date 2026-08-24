@@ -1,6 +1,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <gtk/gtk.h>
 
+#include <scroom/logger.hh>
+
 #include "slipresentationinterface.hh"
 
 /** Enum encoding the indices of the columns in the GtkListStore */
@@ -38,18 +40,21 @@ public:
   ViewInterface::WeakPtr viewWeak;
 
 private:
-  /** Constructor */
+  Scroom::Logger logger;
+
+private:
   SliControlPanel(ViewInterface::WeakPtr viewWeak_,
-                  SliPresentationInterface::WeakPtr presentation_);
+                  SliPresentationInterface::WeakPtr presentation_,
+                  Scroom::Logger logger);
 
   /** Create a TreeView and link it to a ListStore model */
   virtual void create_view_and_model();
 
 public:
-  /** Constructor */
   static SliControlPanel::Ptr
   create(ViewInterface::WeakPtr viewWeak_,
-         SliPresentationInterface::WeakPtr presentation_);
+         SliPresentationInterface::WeakPtr presentation_,
+         Scroom::Logger logger);
 
   /** Get the number of layers in the model */
   unsigned int getNumLayers() { return n_layers; };

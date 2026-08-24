@@ -2,7 +2,10 @@
 
 #include <memory>
 
+#include <scroom/logger.hh>
+
 #include "../colorconfig/CustomColor.hh"
+#include "../colorconfig/CustomColorConfig.hh"
 #include <scroom/scroominterface.hh>
 
 class SliLayer : public virtual Scroom::Utils::Base {
@@ -50,12 +53,14 @@ public:
   std::unique_ptr<uint8_t[]> bitmap;
 
 private:
-  SliLayer();
+  explicit SliLayer(Scroom::Logger logger);
+
+  Scroom::Logger logger;
+  ColorConfig::Ptr colorConfig;
 
 public:
-  /** Constructor */
   static Ptr create(const std::string &filepath, const std::string &name,
-                    int xoffset, int yoffset);
+                    int xoffset, int yoffset, Scroom::Logger logger);
 
   /** Destructor */
   ~SliLayer() override = default;

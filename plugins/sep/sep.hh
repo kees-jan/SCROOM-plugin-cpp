@@ -1,5 +1,6 @@
 #pragma once
 
+#include <scroom/logger.hh>
 #include <scroom/plugininformationinterface.hh>
 #include <scroom/presentationinterface.hh>
 #include <scroom/utilities.hh>
@@ -12,6 +13,7 @@ public:
 
 private:
   Sep();
+  Scroom::Logger logger;
 
 public:
   static Ptr create();
